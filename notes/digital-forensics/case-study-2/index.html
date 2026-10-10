@@ -42,6 +42,9 @@
                         <li><a href="../index.html">Index</a></li>
                         <li><a href="../case-study-1/index.html">Case Study 1</a></li>
                         <li><a href="index.html" aria-current="page">Case Study 2</a></li>
+                        <li><a href="../case-study-3/index.html">Case Study 3</a></li>
+                        <li><a href="../case-study-4/index.html">Case Study 4</a></li>
+                        <li><a href="../case-study-5/index.html">Case Study 5</a></li>
                     </ul>
                 </section>
             </div>
@@ -69,6 +72,37 @@
                 names are not mentioned for privacy, and the original author redaction is preserved.
             </aside>
 
+            <nav class="memo-toc" aria-label="Case study sections">
+                <p>In this memorandum</p>
+                <ol>
+                    <li><a href="#executive-summary">Summary</a></li>
+                    <li><a href="#findings-worksheet">Findings</a></li>
+                    <li><a href="#technical-analysis">Technical analysis</a></li>
+                    <li><a href="#limitations">Limitations</a></li>
+                    <li><a href="#investigation-challenge">Investigation challenge</a></li>
+                    <li><a href="#conclusion">Conclusion</a></li>
+                </ol>
+            </nav>
+
+            <dl class="case-findings-summary" aria-label="Case findings at a glance">
+                <div>
+                    <dt>Recovered</dt>
+                    <dd>Five deleted files</dd>
+                </div>
+                <div>
+                    <dt>Primary evidence</dt>
+                    <dd>Recycle Bin + MFT</dd>
+                </div>
+                <div>
+                    <dt>Supported finding</dt>
+                    <dd>Deletion occurred</dd>
+                </div>
+                <div>
+                    <dt>Not established</dt>
+                    <dd>Actor or intent</dd>
+                </div>
+            </dl>
+
             <article class="memo-document">
                 <section class="memo-section" id="executive-summary">
                     <p class="section-number">01</p>
@@ -94,99 +128,169 @@
                             have been useful but were unavailable. Timestamps are reproduced in UTC as recorded in the
                             assignment.</p>
 
-                        <div class="memo-table-wrap" role="region" aria-label="Forensic artifacts" tabindex="0">
-                            <table class="memo-table">
-                                <caption>Artifacts examined or sought</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Artifact</th>
-                                        <th scope="col">Location</th>
-                                        <th scope="col">Timestamp</th>
-                                        <th scope="col">Status and significance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row"><code>$I</code> / <code>$R</code> files</th>
-                                        <td><code>C:\$Recycle.Bin\[User SID]\</code></td>
-                                        <td><time datetime="2026-09-12T19:00:00Z">2026-09-12<br>19:00:00 UTC</time>
-                                        </td>
-                                        <td><span class="artifact-status is-observed">Observed</span> The
-                                            <code>$I</code> metadata records the original path, size, and deletion
-                                            time; its paired <code>$R</code> file contains the deleted content.</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">MFT entry</th>
-                                        <td><code>$MFT</code></td>
-                                        <td><time datetime="2026-09-12T19:07:43Z">2026-09-12<br>19:07:43 UTC</time>
-                                        </td>
-                                        <td><span class="artifact-status is-observed">Observed</span> The entry
-                                            contributes file-system metadata, including time values, size, allocation
-                                            status, and location. It does not identify the human actor.</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Windows Security Event Logs</th>
-                                        <td><code>C:\Windows\System32\winevt\Logs\Security.evtx</code></td>
-                                        <td><time datetime="2026-09-11T19:10:00Z">2026-09-11<br>19:10:00 UTC</time>
-                                        </td>
-                                        <td><span class="artifact-status is-missing">Not available</span> Relevant
-                                            logon events could have helped establish which account session was active,
-                                            but would not by themselves identify the person at the keyboard.</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Registry data</th>
-                                        <td><code>C:\Windows\System32\config</code></td>
-                                        <td><time datetime="2026-09-11T18:30:00Z">2026-09-11<br>18:30–19:20 UTC</time>
-                                        </td>
-                                        <td><span class="artifact-status is-missing">Not available</span> Relevant
-                                            Registry artifacts might have contributed file-use and user-context clues
-                                            to the activity timeline.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <aside class="memo-editor-note">
+                            <strong>Timestamp note.</strong> The worksheet dates are reproduced as supplied. The
+                            one-day difference between the expected log and Registry window and the recovered deletion
+                            artifacts would need to be reconciled in a complete investigation.
+                        </aside>
+
+                        <div class="artifact-register" aria-label="Artifacts examined or sought">
+                            <article class="artifact-card">
+                                <header>
+                                    <p class="artifact-number">Artifact 01</p>
+                                    <span class="artifact-status is-observed">Observed</span>
+                                </header>
+                                <h3><code>$I</code> / <code>$R</code> files</h3>
+                                <dl class="artifact-details">
+                                    <div>
+                                        <dt>Location</dt>
+                                        <dd><code>C:\$Recycle.Bin\[User SID]\</code></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Timestamp</dt>
+                                        <dd><time datetime="2026-09-12T19:00:00Z">September 12, 2026 · 19:00:00
+                                                UTC</time></dd>
+                                    </div>
+                                </dl>
+                                <p>The <code>$I</code> metadata records the original path, size, and deletion time;
+                                    its paired <code>$R</code> file contains the deleted content.</p>
+                            </article>
+
+                            <article class="artifact-card">
+                                <header>
+                                    <p class="artifact-number">Artifact 02</p>
+                                    <span class="artifact-status is-observed">Observed</span>
+                                </header>
+                                <h3>MFT entry</h3>
+                                <dl class="artifact-details">
+                                    <div>
+                                        <dt>Location</dt>
+                                        <dd><code>$MFT</code></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Timestamp</dt>
+                                        <dd><time datetime="2026-09-12T19:07:43Z">September 12, 2026 · 19:07:43
+                                                UTC</time></dd>
+                                    </div>
+                                </dl>
+                                <p>The entry contributes file-system metadata, including time values, size,
+                                    allocation status, and location. It does not identify the human actor.</p>
+                            </article>
+
+                            <article class="artifact-card is-unavailable">
+                                <header>
+                                    <p class="artifact-number">Artifact 03</p>
+                                    <span class="artifact-status is-missing">Not available</span>
+                                </header>
+                                <h3>Windows Security Event Logs</h3>
+                                <dl class="artifact-details">
+                                    <div>
+                                        <dt>Expected location</dt>
+                                        <dd><code>C:\Windows\System32\winevt\Logs\Security.evtx</code></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Worksheet time</dt>
+                                        <dd><time datetime="2026-09-11T19:10:00Z">September 11, 2026 · 19:10:00
+                                                UTC</time></dd>
+                                    </div>
+                                </dl>
+                                <p>Relevant logon events could have helped establish which account session was active,
+                                    but would not by themselves identify the person at the keyboard.</p>
+                            </article>
+
+                            <article class="artifact-card is-unavailable">
+                                <header>
+                                    <p class="artifact-number">Artifact 04</p>
+                                    <span class="artifact-status is-missing">Not available</span>
+                                </header>
+                                <h3>Registry data</h3>
+                                <dl class="artifact-details">
+                                    <div>
+                                        <dt>Expected location</dt>
+                                        <dd><code>C:\Windows\System32\config</code></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Worksheet window</dt>
+                                        <dd><time datetime="2026-09-11T18:30:00Z">September 11, 2026 ·
+                                                18:30–19:20 UTC</time></dd>
+                                    </div>
+                                </dl>
+                                <p>Relevant Registry artifacts might have contributed file-use and user-context clues
+                                    to the activity timeline.</p>
+                            </article>
                         </div>
 
                         <h3 class="memo-subheading">Interpretations and alternatives</h3>
-                        <div class="memo-table-wrap" role="region" aria-label="Interpretations and alternatives"
-                            tabindex="0">
-                            <table class="memo-table interpretation-table">
-                                <caption>Assessment of possible interpretations</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Interpretation</th>
-                                        <th scope="col">Alternative explanation</th>
-                                        <th scope="col">Confidence</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>The project files were sent to the Recycle Bin.</td>
-                                        <td>The recovered files may have been older project files rather than the files
-                                            considered critical to the company.</td>
-                                        <td><span class="confidence-level is-high">High</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>If the employee was the only person at the workstation, that would support
-                                            the employee having performed the deletion.</td>
-                                        <td>Another person could have used the workstation or the employee’s account.
-                                        </td>
-                                        <td><span class="confidence-level">Medium</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>A concurrent account logon would connect the deletion window to that
-                                            account session.</td>
-                                        <td>Someone else may have known or used the account credentials.</td>
-                                        <td><span class="confidence-level">Medium</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>The deletion occurred within the suspected user’s account context.</td>
-                                        <td>Account context does not establish the identity or intent of the person who
-                                            initiated the action.</td>
-                                        <td><span class="confidence-level">Medium</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <ol class="assessment-list">
+                            <li>
+                                <div class="assessment-heading">
+                                    <span>01</span>
+                                    <span class="confidence-level is-high">High confidence</span>
+                                </div>
+                                <div class="assessment-comparison">
+                                    <div>
+                                        <h4>Interpretation</h4>
+                                        <p>The project files were sent to the Recycle Bin.</p>
+                                    </div>
+                                    <div>
+                                        <h4>Alternative</h4>
+                                        <p>The recovered files may have been older project files rather than the files
+                                            considered critical to the company.</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="assessment-heading">
+                                    <span>02</span>
+                                    <span class="confidence-level">Medium confidence</span>
+                                </div>
+                                <div class="assessment-comparison">
+                                    <div>
+                                        <h4>Interpretation</h4>
+                                        <p>If the employee was the only person at the workstation, that would support
+                                            the employee having performed the deletion.</p>
+                                    </div>
+                                    <div>
+                                        <h4>Alternative</h4>
+                                        <p>Another person could have used the workstation or the employee’s account.</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="assessment-heading">
+                                    <span>03</span>
+                                    <span class="confidence-level">Medium confidence</span>
+                                </div>
+                                <div class="assessment-comparison">
+                                    <div>
+                                        <h4>Interpretation</h4>
+                                        <p>A concurrent account logon would connect the deletion window to that account
+                                            session.</p>
+                                    </div>
+                                    <div>
+                                        <h4>Alternative</h4>
+                                        <p>Someone else may have known or used the account credentials.</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="assessment-heading">
+                                    <span>04</span>
+                                    <span class="confidence-level">Medium confidence</span>
+                                </div>
+                                <div class="assessment-comparison">
+                                    <div>
+                                        <h4>Interpretation</h4>
+                                        <p>The deletion occurred within the suspected user’s account context.</p>
+                                    </div>
+                                    <div>
+                                        <h4>Alternative</h4>
+                                        <p>Account context does not establish the identity or intent of the person who
+                                            initiated the action.</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
                     </div>
                 </section>
 

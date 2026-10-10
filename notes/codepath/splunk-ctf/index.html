@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="CodePath CYB102 Project 5 notes: Splunk CTF searches against Netflix catalog data and a PathCode Inc malware investigation dataset.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Splunk CTF / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="codepath-navigation">
+                    <h2 class="sidebar-heading" id="codepath-navigation">CodePath</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../directory-traversal/index.html">Directory Traversal</a></li>
+                        <li><a href="../dos-mitigation/index.html">DoS Mitigation</a></li>
+                        <li><a href="index.html" aria-current="page">Splunk CTF</a></li>
+                        <li><a href="../solarwinds-ioc-hunting/index.html">SolarWinds IOC Hunting</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">CodePath</a> / <span aria-current="page">003</span></nav>
+                <p class="article-label">Educational security lab · CYB102 · Project 5</p>
+                <h1 class="article-title">Splunk CTF</h1>
+                <p class="article-deck">Capture-the-flag style Splunk searches: Netflix catalog questions, then a
+                    PathCode Inc malware investigation using uploaded-hash, login, and web-server logs.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized CodePath Intermediate Cybersecurity CTF. Answers below are
+                from the course Splunk environment (<code>index=main</code> / Netflix host, and
+                <code>index=pathcode</code>). Not a live production investigation.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="overview">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Overview</h2>
+                        <p>Unit 5’s project is a Capture-the-Flag Splunk activity. Instead of a fully guided lab, each
+                            challenge asks for a hypothesis and a search that proves it—closer to how SOC analysts work
+                            an investigation. Part 1 searches Netflix catalog data. Part 2 investigates an attacker who
+                            entered systems at the fictional PathCode Inc.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="goals">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Goals</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>Search &amp; analysis</dt>
+                                <dd>Apply Splunk search, analysis, and visualization techniques to concrete
+                                    questions.</dd>
+                            </div>
+                            <div>
+                                <dt>Investigation habits</dt>
+                                <dd>Practice forming a hypothesis and proving it with logs rather than following a fixed
+                                    click path.</dd>
+                            </div>
+                            <div>
+                                <dt>Dataset fluency</dt>
+                                <dd>Gain experience searching and correlating events across different hosts and indexes
+                                    in a competitive CTF format.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="part-1">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Part 1 · Searching the Netflix Data</h2>
+                        <p>Base context: <code>index=main source=Netflix</code> (searches below use
+                            <code>host=Netflix</code> as recorded in the submission).</p>
+
+                        <ol class="ctf-list">
+                            <li>
+                                <h3>Challenge 1</h3>
+                                <p>How many TV shows on Netflix are in the Docuseries genre?</p>
+                                <p class="ctf-answer"><span>Answer</span> 790</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="TV Show" listed_in="*Docuseries*"
+| stats count</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 2</h3>
+                                <p>How many movies on Netflix have a rating of TV-PG?</p>
+                                <p class="ctf-answer"><span>Answer</span> 1080</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="Movie" rating="TV-PG" | stats count</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 3</h3>
+                                <p>How many movies on Netflix were released in the year 2020?</p>
+                                <p class="ctf-answer"><span>Answer</span> 1034</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="Movie" release_year=2020
+| stats count</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 4</h3>
+                                <p>What is the longest duration by season on Netflix, and what is its TV rating?</p>
+                                <p class="ctf-answer"><span>Answer</span> Grey’s Anatomy</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="TV Show"
+| rex field=duration "(?P&lt;seasons&gt;\d+)"
+| eval seasons=tonumber(seasons)
+| sort -seasons
+| table title, duration, rating
+| head 1</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 5</h3>
+                                <p>How many movies on Netflix are listed as rated PG-13 and listed in Action &amp;
+                                    Adventure?</p>
+                                <p class="ctf-answer"><span>Answer</span> 296</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="Movie" rating="PG-13" listed_in="*Action &amp; Adventure*"
+| stats count</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 6</h3>
+                                <p>How many movies and TV shows on Netflix have their country of origin as Turkey?</p>
+                                <p class="ctf-answer"><span>Answer</span> 152</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix country="*Turkey*"
+| stats count</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 7</h3>
+                                <p>Which release year had the most movies rated G? (Not TV-G)</p>
+                                <p class="ctf-answer"><span>Answer</span> 2009</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="Movie" rating="G"
+| stats count by release_year
+| sort -count
+| head 1</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 8</h3>
+                                <p>What two TV-Y7 rated shows were released in 2019 and were added to Netflix on November
+                                    22, 2019?</p>
+                                <p class="ctf-answer"><span>Answer</span> Trolls: The Beat Goes On &amp; The Dragon
+                                    Prince</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix rating="TV-Y7" release_year=2019 date_added="November 22, 2019"
+| table title</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 9</h3>
+                                <p>Which year had the most TV Shows from the United States?</p>
+                                <p class="ctf-answer"><span>Answer</span> 2020</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="TV Show" country="*United States*"
+| stats count by release_year
+| sort -count
+| head 1</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 10</h3>
+                                <p>What is the oldest TV show by Release Year on Netflix?</p>
+                                <p class="ctf-answer"><span>Answer</span> Pioneers: First Women Filmmakers*</p>
+                                <pre class="ctf-search"><code>index=main host=Netflix type="TV Show"
+| sort release_year
+| table title, release_year
+| head 1</code></pre>
+                            </li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="part-2">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Part 2 · Investigating the Malware</h2>
+                        <p>Scenario: an attacker entered systems at PathCode Inc. Logs are under
+                            <code>index=pathcode</code>.</p>
+
+                        <ol class="ctf-list" start="11">
+                            <li>
+                                <h3>Challenge 11</h3>
+                                <p>What was the IP address that uploaded the malware (MD5 hash:
+                                    <code>3AADBF7E527FC1A050E1C97FEA1CBA4D</code>)?</p>
+                                <p class="ctf-answer"><span>Answer</span> 192.168.1.10</p>
+                                <pre class="ctf-search"><code>host=uploadedhashes "File Hash"="3AADBF7E527FC1A050E1C97FEA1CBA4D"
+| table *</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 12</h3>
+                                <p>What usernames did that IP address try to login to the system as? Which one did they
+                                    upload a file as?</p>
+                                <p class="ctf-answer"><span>Answer</span> ABurke</p>
+                                <pre class="ctf-search"><code>host=failedlogins64 "192.168.1.10"
+| table *</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 13</h3>
+                                <p>What was the User Agent String of the attacker when they successfully uploaded a
+                                    file?</p>
+                                <p class="ctf-answer"><span>Answer</span> Firefox/89.0</p>
+                                <pre class="ctf-search"><code>host=webserver02 "192.168.1.10"
+| table *</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 14</h3>
+                                <p>Did any other users also upload a file around that time? If so, who and what was their
+                                    IP address?</p>
+                                <p class="ctf-answer"><span>Answer</span> Yes — IP 192.168.1.8 uploaded Style.css at
+                                    17:49</p>
+                                <pre class="ctf-search"><code>host=uploadedhashes
+| table *</code></pre>
+                            </li>
+                            <li>
+                                <h3>Challenge 15</h3>
+                                <p>Looking at the uploaded hashes, what were the files called that the two users
+                                    uploaded? Which one seems like it was malicious?</p>
+                                <p class="ctf-answer"><span>Answer</span> Evilscript.exe and Style.css —
+                                    Evilscript.exe was the malicious upload</p>
+                                <pre class="ctf-search"><code>host=uploadedhashes
+| table *</code></pre>
+                            </li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to CodePath notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

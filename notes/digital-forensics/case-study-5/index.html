@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="A group case study reconstructing a phishing attack chain from email headers, browser artifacts, and authentication logs—while distinguishing credential theft from physical attribution.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>The Phishing Investigation / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="forensics-navigation">
+                    <h2 class="sidebar-heading" id="forensics-navigation">Digital Forensics</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../case-study-1/index.html">Case Study 1</a></li>
+                        <li><a href="../case-study-2/index.html">Case Study 2</a></li>
+                        <li><a href="../case-study-3/index.html">Case Study 3</a></li>
+                        <li><a href="../case-study-4/index.html">Case Study 4</a></li>
+                        <li><a href="index.html" aria-current="page">Case Study 5</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Digital Forensics</a> / <span aria-current="page">005</span></nav>
+                <p class="article-label">Group case study / phishing investigation</p>
+                <h1 class="article-title">The Phishing Investigation</h1>
+                <p class="article-deck">A reconstruction of email delivery, credential capture, and suspicious
+                    logins—and why network artifacts can prove credential misuse without proving where the attacker
+                    sat.</p>
+            </header>
+
+            <dl class="memo-routing" aria-label="Memorandum details">
+                <div><dt>To</dt><dd>Management</dd></div>
+                <div><dt>From</dt><dd>&lt;REDACTED&gt;</dd></div>
+                <div><dt>Date</dt><dd><time datetime="2026-10-05">October 5, 2026</time></dd></div>
+                <div><dt>Subject</dt><dd>The Phishing Investigation — Case 5</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Authorship and privacy note">
+                <strong>Publication note.</strong> This memorandum was completed as a group assignment. Contributor
+                names are not mentioned for privacy, and the original author redaction is preserved.
+            </aside>
+
+            <nav class="memo-toc" aria-label="Case study sections">
+                <p>In this memorandum</p>
+                <ol>
+                    <li><a href="#timeline">Timeline</a></li>
+                    <li><a href="#email-analysis">Email analysis</a></li>
+                    <li><a href="#endpoint-network">Endpoint &amp; network</a></li>
+                    <li><a href="#incident-summary">Incident summary</a></li>
+                    <li><a href="#investigation-challenge">Attribution</a></li>
+                    <li><a href="#conclusion">Conclusion</a></li>
+                </ol>
+            </nav>
+
+            <dl class="case-findings-summary" aria-label="Case findings at a glance">
+                <div>
+                    <dt>Attack chain</dt>
+                    <dd>Email → link → login</dd>
+                </div>
+                <div>
+                    <dt>Primary evidence</dt>
+                    <dd>Headers + auth logs</dd>
+                </div>
+                <div>
+                    <dt>Supported finding</dt>
+                    <dd>Credentials reused</dd>
+                </div>
+                <div>
+                    <dt>Not established</dt>
+                    <dd>Physical attacker location</dd>
+                </div>
+            </dl>
+
+            <article class="memo-document">
+                <section class="memo-section" id="timeline">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Timeline Reconstruction</h2>
+                        <p>The sequence below orders the phishing chain from message delivery through credential reuse
+                            and unusual account activity on sensitive data.</p>
+
+                        <table class="investigative-timeline is-wide">
+                            <caption>Attack-chain events ordered by investigative sequence</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Order</th>
+                                    <th scope="col">Event</th>
+                                    <th scope="col">Source</th>
+                                    <th scope="col">Evidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="timeline-order">1</th>
+                                    <td class="timeline-event">Email received</td>
+                                    <td class="timeline-source">Full email headers and system logs</td>
+                                    <td class="timeline-evidence">Phishing email delivered to the employee; the send
+                                        path is present and includes both addresses.</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">2</th>
+                                    <td class="timeline-event">Link in email opened</td>
+                                    <td class="timeline-source">DNS and firewall logs, browser history</td>
+                                    <td class="timeline-evidence">The workstation connects to the compromised domain.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">3</th>
+                                    <td class="timeline-event">Credentials entered in domain</td>
+                                    <td class="timeline-source">Browser history, proxy logs, firewall logs</td>
+                                    <td class="timeline-evidence">The HTTP POST is sent to the host after the page is
+                                        loaded.</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">4</th>
+                                    <td class="timeline-event">Suspicious login</td>
+                                    <td class="timeline-source">Authentication log</td>
+                                    <td class="timeline-evidence">Several suspicious IP addresses use employee
+                                        credentials to log in successfully.</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">5</th>
+                                    <td class="timeline-event">Account activity</td>
+                                    <td class="timeline-source">Authentication logs, audit logs, firewall logs</td>
+                                    <td class="timeline-evidence">Unusual activity occurs on this employee’s account
+                                        accessing sensitive data.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="email-analysis">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Email Analysis &amp; Sender Verification</h2>
+                        <p>To find the true routing path of a message, the email headers can be examined. Headers
+                            contain the sender and recipient addresses, Return-Path, Reply-To, Message-ID, timestamps,
+                            and authentication results. The Received fields track the IP address of every MTA the email
+                            passes through. Those fields are read from the bottom up, so the lowest entry shows the
+                            originating server. They must be interpreted carefully: they show the path, but they do
+                            not prove where the attacker was physically located.</p>
+                        <p>SPF, DKIM, and DMARC are protocols used to reduce spoofing. SPF verifies authorized sender
+                            IPs, DKIM provides a cryptographic signature, and DMARC defines policy for handling failed
+                            checks. These results help show whether an email came from the domain it claimed. If a
+                            check fails, the message is more likely to be suspicious. The protocols are not always
+                            configured correctly, however, and the From address can still be spoofed because SMTP does
+                            not verify that field—the sender can enter any address. <span class="citation">(Nelson,
+                                Phillips, &amp; Steuart, 2019)</span></p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="endpoint-network">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Endpoint &amp; Network Correlation</h2>
+                        <p>Investigators should never click a malicious link on a live host. URLs should be examined in
+                            an isolated environment, such as a virtual machine. Investigators can also scan links with
+                            free tools to check website age, since newly registered sites are more likely to be fake.
+                        </p>
+                        <p>Browser artifacts such as session cookies and cache can show that the user visited the
+                            phishing page. Browser history shows when the page was visited, and login records show
+                            where and when authentication occurred. A login from an unfamiliar location supports the
+                            conclusion that a stolen password was used. One log is not enough on its own; firewall
+                            logs and DNS requests must be correlated to reconstruct the full attack chain.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="incident-summary">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Incident Sequence Summary</h2>
+                        <p>The incident began when an email bypassed filtering via spoofing. The user was socially
+                            engineered into clicking a malicious link. The message was designed to create urgency by
+                            claiming the account would be shut off—a tactic meant to push fast action. The link
+                            redirected the user to a fake portal where credentials were entered. The attacker then used
+                            those credentials to log in from suspicious IP addresses.</p>
+                        <p>Authentication logs support that the credentials were stolen and then used to access the
+                            corporate environment and view or exfiltrate sensitive data. Remediation should include
+                            changing the user’s password, blocking the malicious website, and enabling two-factor
+                            authentication so that knowing the stolen password is not enough to enter the system. The
+                            second factor can be a prompt on a known device, a verification code sent to a phone
+                            number, or a similar challenge. <span class="citation">(HackTricks, n.d.)</span></p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="investigation-challenge">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Investigation Challenge: Attribution &amp; Geolocation</h2>
+                        <p>A foreign IP associated with malicious activity does not prove the actor was physically
+                            located in that country. The traffic may have traveled through a VPN, proxy, Tor, or other
+                            masking methods. IP geolocation databases are not always accurate, and attackers can route
+                            traffic through compromised machines. <span class="citation">(NHI Mgmt Group, 2026)</span>
+                        </p>
+                        <p>Authentication logs only prove that credentials were used from a given IP address. They do
+                            not identify the person behind the keyboard or establish the attacker’s true physical
+                            location.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="conclusion">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Conclusion</h2>
+                        <p>The defensible conclusion is that a phishing message led to credential capture and later
+                            reuse against corporate systems, as shown by correlated email, browser, DNS, firewall, and
+                            authentication artifacts. Those logs do not establish the attacker’s physical location or
+                            personal identity.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="references">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>References</h2>
+                        <ol>
+                            <li>HackTricks. (n.d.). <a
+                                    href="https://hacktricks.wiki/en/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/browser-artifacts.html"><cite>Browser
+                                        artifacts</cite></a>. HackTricks Wiki.</li>
+                            <li>Nelson, B., Phillips, A., &amp; Steuart, C. (2019). <cite>Guide to computer forensics
+                                    and investigations</cite> (6th ed.). Cengage Learning.</li>
+                            <li>NHI Mgmt Group. (2026, August 15). <a
+                                    href="https://nhimg.org/glossary/ip-geolocation/"><cite>What is IP geolocation?
+                                        Definition &amp; examples</cite></a>.</li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Digital Forensics notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

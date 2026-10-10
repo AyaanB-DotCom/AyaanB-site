@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Authorized lab notes: Metasploitable setup, Nmap port discovery, and OpenVAS vulnerability assessment on a simulated target.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Metasploitable Vulnerability Assessment / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="index.html" aria-current="page">Metasploitable Assessment</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">001</span></nav>
+                <p class="article-label">Educational lab · vulnerability assessment</p>
+                <h1 class="article-title">Metasploitable Vulnerability Assessment</h1>
+                <p class="article-deck">Setting up Metasploitable and Kali on a shared NAT network, discovering open
+                    ports with Nmap, and assessing the target with OpenVAS / Greenbone.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized assessment of an intentionally vulnerable Metasploitable
+                VM in a local VirtualBox environment. Credentials generated during tool setup are not published here.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="setup">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>VM Setup &amp; Addressing</h2>
+                        <p>We started by installing the Metasploitable VM. A new Kali install was not required for the
+                            target—attaching the <code>.vmdk</code> to a new VirtualBox machine without a setup ISO was
+                            enough.</p>
+                        <p>An initial <code>ip addr</code> on Metasploitable showed <code>10.0.2.15</code>. That address
+                            did not remain usable for scanning from Kali, so a new NAT network was created and attached
+                            to both the Metasploitable and Kali VMs. After that change, the Metasploitable host used for
+                            Nmap and OpenVAS was <code>10.0.2.3</code>.</p>
+
+                        <figure class="research-figure">
+                            <img src="metasploitable-ip-addr.png"
+                                alt="Metasploitable terminal showing ip addr during initial setup"
+                                width="1200" height="800" decoding="async">
+                            <figcaption><span>Fig. 01</span> Initial Metasploitable interface check with
+                                <code>ip addr</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="metasploitable-ip-nat.png"
+                                alt="Metasploitable terminal after NAT network change showing eth0 at 10.0.2.3/24"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> Addressing after the shared NAT network —
+                                <code>eth0</code> at <code>10.0.2.3/24</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="nmap">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Nmap Port Discovery</h2>
+                        <p>From Kali, an Nmap scan was run against the Metasploitable host with
+                            <code>-T4</code> (aggressive timing). That is acceptable only because this was an owned lab
+                            target; the same scan against an unauthorized network can create legal and employment risk.
+                            Timing templates such as <code>-T0</code> are quieter when lower noise matters.</p>
+                        <p>The scan returned a long list of open ports. At a glance, services such as SSH, MySQL, HTTP,
+                            FTP, and others were exposed—typical of Metasploitable’s intentionally weak surface.</p>
+
+                        <figure class="research-figure">
+                            <img src="nmap-scan.png"
+                                alt="Kali terminal showing nmap -T4 against 10.0.2.3 with many open TCP ports"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Nmap results for <code>10.0.2.3</code> saved to
+                                <code>nmap_scan.txt</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="openvas-setup">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>OpenVAS Installation &amp; Feed Sync</h2>
+                        <p>After the Nmap pass, OpenVAS (Greenbone Vulnerability Management) and its dependencies were
+                            installed on Kali. Generated admin credentials were saved locally for lab use (not archived
+                            on this site).</p>
+                        <p>The vulnerability feed stuck on syncing. Kali was reinstalled with 4 GB of RAM instead of 2
+                            GB. Logs were checked to confirm updates were progressing; the sync took about 35–40 minutes
+                            before scans were available again.</p>
+
+                        <figure class="research-figure">
+                            <img src="openvas-feed-syncing.png"
+                                alt="OpenVAS banner stating the feed is currently syncing and scans are unavailable"
+                                width="1000" height="200" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Feed syncing notice while scans were blocked.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="openvas-feed-status.png"
+                                alt="OpenVAS Feed Status page showing NVT, SCAP, CERT, and GVMD_DATA updates in progress"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> Feed Status during the long update window.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="openvas-feed-done.png"
+                                alt="Kali terminal logs showing Discovery NVTs update completed"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> Manager logs confirming Discovery NVT updates
+                                finished.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="openvas-scan">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>OpenVAS Scan</h2>
+                        <p>With feeds ready, a task was started against <code>10.0.2.3</code> from the Greenbone web UI
+                            (<code>https://127.0.0.1:9392</code>). The scan ran for about half an hour before completing.
+                        </p>
+
+                        <figure class="research-figure">
+                            <img src="openvas-task-wizard.png"
+                                alt="OpenVAS Task Wizard set to immediately scan IP 10.0.2.3"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 07</span> Task Wizard targeting <code>10.0.2.3</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="openvas-scan-task.png"
+                                alt="OpenVAS Tasks page showing Immediate scan of IP 10.0.2.3"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 08</span> Scan task created for the Metasploitable host.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="openvas-report.png"
+                                alt="OpenVAS report results listing critical findings on host 10.0.2.3"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 09</span> Completed report results for
+                                <code>10.0.2.3</code>.</figcaption>
+                        </figure>
+
+                        <p>Full report PDF:
+                            <a href="openvas-report.pdf"><code>report-94224f3f-5bcc-4079-a97c-33c46fa50a3b.pdf</code></a>
+                        </p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="tool-capabilities">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Capabilities of Tools Used</h2>
+                        <p>Nmap is useful for discovering open ports on systems you are authorized to assess—including
+                            your own lab or a company network under an approved engagement. Timing templates trade speed
+                            for noise; aggressive options such as <code>-T4</code> fit owned lab targets, while quieter
+                            options reduce disruption when that is required. Unauthorized scanning of networks you do
+                            not control can have legal and professional consequences.</p>
+                        <p>OpenVAS / Greenbone can monitor systems and networks for known weaknesses. Reports summarize
+                            findings by severity, call out affected ports, reference CVEs, and often suggest remediation
+                            paths for further research and fixes.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="findings">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Findings</h2>
+                        <p>The Metasploitable host is running an end-of-life Ubuntu 8.04 image. The OpenVAS report
+                            surfaced a large set of issues—on the order of 69 findings in the summarized view, including
+                            critical and high-severity items.</p>
+
+                        <table class="investigative-timeline">
+                            <caption>Severity summary from the lab report write-up</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Severity</th>
+                                    <th scope="col">Count</th>
+                                    <th scope="col">Key risks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="timeline-time">Critical</th>
+                                    <td class="timeline-event">14</td>
+                                    <td class="timeline-artifact">Remote code execution, backdoors, passwordless logins
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">High</th>
+                                    <td class="timeline-event">9</td>
+                                    <td class="timeline-artifact">Brute-force success, unencrypted cleartext logins</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">Medium</th>
+                                    <td class="timeline-event">40</td>
+                                    <td class="timeline-artifact">Outdated software (Samba, PHP, TWiki), weak SSL/TLS
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">Low</th>
+                                    <td class="timeline-event">6</td>
+                                    <td class="timeline-artifact">Information disclosure (TCP/ICMP timestamps)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <aside class="memo-editor-note">
+                            <strong>Note.</strong> Google Gemini was used to help gather counts from the report and
+                            assemble this severity table. Interpretation of individual findings is from the lab write-up.
+                        </aside>
+
+                        <p>Among the critical issues, remote code execution stands out because it can let an attacker
+                            compromise the system without physical access. Passwordless login paths can yield root-level
+                            control and exposure of system files. Default MySQL credentials are especially serious if a
+                            database holds account data. Port 80 (HTTP) findings included cross-site scripting risk,
+                            which can lead to cookie theft and page compromise.</p>
+                        <p>In the high category, successful FTP login with weak credentials shows how weak authentication
+                            can grant access to sensitive content with little resistance. Medium findings included
+                            anonymous FTP on port 21, which allows access without credentials.</p>
+                        <p>These examples are only a sample. The OpenVAS report documents many additional findings, how
+                            they were detected, and suggested remediation directions.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

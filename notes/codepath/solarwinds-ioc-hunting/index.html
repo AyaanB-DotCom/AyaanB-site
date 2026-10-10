@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="CodePath CYB102 Project 7 notes: correlating SolarWinds-related proxy log activity with known IOC IPs in Splunk and VirusTotal.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>SolarWinds IOC Hunting / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="codepath-navigation">
+                    <h2 class="sidebar-heading" id="codepath-navigation">CodePath</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../directory-traversal/index.html">Directory Traversal</a></li>
+                        <li><a href="../dos-mitigation/index.html">DoS Mitigation</a></li>
+                        <li><a href="../splunk-ctf/index.html">Splunk CTF</a></li>
+                        <li><a href="index.html" aria-current="page">SolarWinds IOC Hunting</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">CodePath</a> / <span aria-current="page">004</span></nav>
+                <p class="article-label">Educational security lab · CYB102 · Project 7</p>
+                <h1 class="article-title">SolarWinds IOC Hunting</h1>
+                <p class="article-deck">Searching proxy logs for known IOC IPs, confirming host/service context in
+                    Splunk, and checking the same indicators on VirusTotal.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized CodePath Intermediate Cybersecurity exercise using course
+                proxy logs and public reputation lookups. Findings below are taken from the submitted Project 7 PDF
+                artifacts—not from a live production network.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="overview">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Overview</h2>
+                        <p>This Project 7 submission correlates a list of suspicious external IP addresses against
+                            <code>NetworkProxyLog02.csv</code> in Splunk. Matched events reference SolarWinds Orion Core
+                            Services and internal hosts with Solar*-style names. Matching IPs were then checked on
+                            VirusTotal for vendor reputation context.</p>
+                        <p>Course materials for this unit also describe a separate CSIRT handoff exercise (Catalyst case
+                            <code>IR-2023-002</code>, first responder Sam Johnson). That written triage / gap /
+                            recommendation analysis is not present in the PDF used for this archive entry, so it is left
+                            unpublished here.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="goals">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Goals</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>IOC correlation</dt>
+                                <dd>Search proxy telemetry for a provided indicator set and record match time, IP, and
+                                    affected hosts or services.</dd>
+                            </div>
+                            <div>
+                                <dt>Reputation research</dt>
+                                <dd>Look up matched IPs in VirusTotal (and related sources) to add context beyond the
+                                    raw log line.</dd>
+                            </div>
+                            <div>
+                                <dt>Dashboard query</dt>
+                                <dd>Capture the Splunk search used to surface the IOC set in one view.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="match-1">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Match 1 · 13.59.205.66</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>IP</dt>
+                                <dd><code>13.59.205.66</code></dd>
+                            </div>
+                            <div>
+                                <dt>Event time</dt>
+                                <dd>2024-03-04, 06:57:28</dd>
+                            </div>
+                            <div>
+                                <dt>Affected</dt>
+                                <dd>SolarWinds Orion Core Services</dd>
+                            </div>
+                            <div>
+                                <dt>VirusTotal</dt>
+                                <dd>8/94 vendors flagged the IP; AS16509 Amazon.com, Inc. (US); reverse DNS
+                                    <code>ec2-13-59-205-66.us-east-2.compute.amazonaws.com</code>.</dd>
+                            </div>
+                        </dl>
+
+                        <figure class="research-figure">
+                            <img src="virustotal-13-59-205-66.png"
+                                alt="VirusTotal detection page for IP 13.59.205.66 showing 8 of 94 vendors flagging it"
+                                width="1351" height="674" decoding="async">
+                            <figcaption><span>Fig. 01</span> VirusTotal report for <code>13.59.205.66</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="match-2">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Match 2 · 5.252.177.25</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>IP</dt>
+                                <dd><code>5.252.177.25</code></dd>
+                            </div>
+                            <div>
+                                <dt>Event time</dt>
+                                <dd>2024-03-03, 07:37:28</dd>
+                            </div>
+                            <div>
+                                <dt>Affected hosts</dt>
+                                <dd><code>MX-SolarStorm-136</code>, <code>LN-SolarStrike-14</code>,
+                                    <code>WS-SolarLight-943</code></dd>
+                            </div>
+                            <div>
+                                <dt>VirusTotal</dt>
+                                <dd>12/94 vendors flagged the IP; AS39798 MivoCloud SRL.</dd>
+                            </div>
+                        </dl>
+
+                        <figure class="research-figure">
+                            <img src="splunk-match-5-252-177-25.png"
+                                alt="Splunk search results for proxy log events containing 5.252.177.25"
+                                width="1865" height="975" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> Splunk events for <code>5.252.177.25</code> in
+                                <code>NetworkProxyLog02.csv</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="virustotal-5-252-177-25.png"
+                                alt="VirusTotal detection page for IP 5.252.177.25 showing 12 of 94 vendors flagging it"
+                                width="1578" height="909" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> VirusTotal report for <code>5.252.177.25</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="dashboard">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Dashboard Query</h2>
+                        <p>Search used to generate the Splunk view over the IOC set:</p>
+                        <pre class="ctf-search"><code>source="NetworkProxyLog02.csv" ("13.59.205.66" OR "54.215.192.52" OR "5.252.177.25" OR "34.203.203.23" OR "139.99.115.204" OR "54.193.127.66" OR "5.252.177.21" OR "204.188.205.176" OR "51.89.125.18" OR "167.114.213.199")</code></pre>
+
+                        <figure class="research-figure">
+                            <img src="splunk-match-dashboard.png"
+                                alt="Splunk search returning 15 proxy log events matching the IOC IP OR query"
+                                width="1863" height="963" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Combined IOC search returning 15 events.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to CodePath notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

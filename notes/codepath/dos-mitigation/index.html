@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="CodePath CYB102 Project 4 notes: Slowloris DoS context, Nginx mitigation rules, Netdata graphs, and pcap comparison.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>DoS Mitigation / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="codepath-navigation">
+                    <h2 class="sidebar-heading" id="codepath-navigation">CodePath</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../directory-traversal/index.html">Directory Traversal</a></li>
+                        <li><a href="index.html" aria-current="page">DoS Mitigation</a></li>
+                        <li><a href="../splunk-ctf/index.html">Splunk CTF</a></li>
+                        <li><a href="../solarwinds-ioc-hunting/index.html">SolarWinds IOC Hunting</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">CodePath</a> / <span aria-current="page">002</span></nav>
+                <p class="article-label">CYB102 · Week 5 · Project 4</p>
+                <h1 class="article-title">DoS Mitigation</h1>
+                <p class="article-deck">Observing a Slowloris denial-of-service against a local Nginx server, then
+                    hardening the config and comparing traffic captures.</p>
+            </header>
+
+            <article class="memo-document">
+                <section class="memo-section" id="overview">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Overview</h2>
+                        <p>Distributed denial-of-service (DDoS) attacks have grown in popularity and have affected
+                            large providers. A simpler form is denial-of-service (DoS), where the attacker operates from
+                            a single internet connection rather than many.</p>
+                        <p>This project runs a Slowloris-style DoS against the local server on a course VM, then adds
+                            Nginx rules to mitigate it. Unlike volumetric floods that overwhelm a host with raw
+                            traffic, Slowloris holds connections open by sending partial HTTP requests
+                            slowly—exhausting connection limits without the volume that traditional flood defenses look
+                            for.</p>
+                        <p>For the stretch task, provided <code>.pcap</code> files are compared to decide which capture
+                            shows a vulnerable server and which shows traffic under DoS mitigation.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="goals">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Goals</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>Tooling</dt>
+                                <dd>Use Nginx and Slowloris in the lab environment, and monitor the host with
+                                    Netdata.</dd>
+                            </div>
+                            <div>
+                                <dt>Mitigation</dt>
+                                <dd>Configure DoS mitigation rules in Nginx (rate limits, connection limits, and related
+                                    status handling).</dd>
+                            </div>
+                            <div>
+                                <dt>Capture analysis</dt>
+                                <dd>Analyze <code>.pcap</code> files to determine which server is vulnerable and which
+                                    is prepared to mitigate DoS.</dd>
+                            </div>
+                            <div>
+                                <dt>Concept</dt>
+                                <dd>Understand why application-layer DoS attacks need different mitigations than
+                                    volumetric flood attacks.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="nginx-config">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Nginx Configuration</h2>
+                        <p>DoS mitigation rules implemented in <code>/etc/nginx/nginx.conf</code> and
+                            <code>/etc/nginx/sites-available/default</code>.</p>
+
+                        <figure class="research-figure">
+                            <img src="nginx-site-config.png"
+                                alt="nano editing /etc/nginx/sites-available/default with limit_req, limit_conn, and limit_req_status rules"
+                                width="1280" height="800" decoding="async">
+                            <figcaption><span>Fig. 01</span> Site config with <code>limit_req</code>,
+                                <code>limit_conn</code>, and <code>limit_req_status 429</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="nginx-conf.png"
+                                alt="nano editing /etc/nginx/nginx.conf showing limit_req_zone and limit_conn_zone in the http block"
+                                width="1280" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> <code>nginx.conf</code> zones:
+                                <code>limit_req_zone</code> at 30r/m and <code>limit_conn_zone</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="netdata">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Netdata · Unprotected Attack</h2>
+                        <p>TCP connections graph during the unprotected Slowloris attack (Netdata dashboard with Network
+                            Traffic and TCP Connections).</p>
+                        <figure class="research-figure">
+                            <img src="netdata-unprotected.png"
+                                alt="Netdata Agent Console showing TCP connections spiking above one thousand during an unprotected Slowloris attack"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Unprotected run: TCP connections spike past 1,000 around
+                                18:36.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="explanation">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Explanation of Differences</h2>
+                        <p>The difference between the protected and unprotected runs can be seen by looking at the
+                            network traffic. As shown by the graph, the unprotected attack causes much higher network
+                            traffic whereas the protected one limits it marginally. The limit request was successful in
+                            mitigating the DoS attack.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="stretch">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Stretch Challenge · PCAP Comparison</h2>
+                        <p>Using Wireshark on the course capture pair, determine which file is from the vulnerable
+                            server and which is from the server with DoS mitigation.</p>
+                        <p>The PCAP from the vulnerable server is <code>B.pcap</code>. <code>A.pcap</code> has many RST
+                            packets, which means active connections are being dropped, whereas <code>B.pcap</code> has
+                            many ACK packets, which means it is accepting Slowloris connections and letting them pile
+                            up, overwhelming the server.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="takeaways">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Key Takeaways</h2>
+                        <p>Rate limiting and connection limits work against Slowloris because they enforce resource
+                            boundaries the server controls—the defense is configuration, not just more bandwidth.
+                            Application-layer attacks are harder to block at the network perimeter because each request
+                            can look like legitimate HTTP; mitigation requires understanding the protocol, not only
+                            volume. The PCAP differences show the same hardware responding differently based solely on
+                            how Nginx is tuned.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to CodePath notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

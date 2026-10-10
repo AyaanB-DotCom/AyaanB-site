@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="A group case study analyzing USB connection artifacts, LNK files, Jump Lists, and cryptographic hash matches in a suspected data-exfiltration investigation.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>The Mystery USB Drive / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="forensics-navigation">
+                    <h2 class="sidebar-heading" id="forensics-navigation">Digital Forensics</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../case-study-1/index.html">Case Study 1</a></li>
+                        <li><a href="../case-study-2/index.html">Case Study 2</a></li>
+                        <li><a href="index.html" aria-current="page">Case Study 3</a></li>
+                        <li><a href="../case-study-4/index.html">Case Study 4</a></li>
+                        <li><a href="../case-study-5/index.html">Case Study 5</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Digital Forensics</a> / <span aria-current="page">003</span></nav>
+                <p class="article-label">Group case study / forensic findings</p>
+                <h1 class="article-title">The Mystery USB Drive</h1>
+                <p class="article-deck">A forensic analysis of removable-media, shortcut, Jump List, and hash
+                    artifacts—and the line between proving that corporate files left a workstation and proving who
+                    took them.</p>
+            </header>
+
+            <dl class="memo-routing" aria-label="Memorandum details">
+                <div><dt>To</dt><dd>Management</dd></div>
+                <div><dt>From</dt><dd>&lt;REDACTED&gt;</dd></div>
+                <div><dt>Date</dt><dd><time datetime="2026-09-24">September 24, 2026</time></dd></div>
+                <div><dt>Subject</dt><dd>Evidence Acquisition Memorandum — Case Study 3 (The Mystery USB Drive)</dd>
+                </div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Authorship and privacy note">
+                <strong>Publication note.</strong> This memorandum was completed as a group assignment. Contributor
+                names are not mentioned for privacy, and the original author redaction is preserved.
+            </aside>
+
+            <nav class="memo-toc" aria-label="Case study sections">
+                <p>In this memorandum</p>
+                <ol>
+                    <li><a href="#executive-summary">Summary</a></li>
+                    <li><a href="#timeline">Timeline</a></li>
+                    <li><a href="#technical-analysis">Technical analysis</a></li>
+                    <li><a href="#interpretation">Interpretation</a></li>
+                    <li><a href="#conclusion">Conclusion</a></li>
+                </ol>
+            </nav>
+
+            <dl class="case-findings-summary" aria-label="Case findings at a glance">
+                <div>
+                    <dt>USB window</dt>
+                    <dd>2:14–2:28 PM</dd>
+                </div>
+                <div>
+                    <dt>Primary evidence</dt>
+                    <dd>USBSTOR + LNK + hashes</dd>
+                </div>
+                <div>
+                    <dt>Supported finding</dt>
+                    <dd>Matching files on USB</dd>
+                </div>
+                <div>
+                    <dt>Not established</dt>
+                    <dd>Actor or intent</dd>
+                </div>
+            </dl>
+
+            <article class="memo-document">
+                <section class="memo-section" id="executive-summary">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Executive Summary</h2>
+                        <p>This report presents findings from the investigation of an employee after security personnel
+                            discovered a USB drive in the employee’s desk. The employee claimed the drive was used for
+                            personal documents and that no copy of confidential information was found at the
+                            workstation.</p>
+                        <p>The investigation examined forensic images, the USB drive, Windows Registry artifacts, LNK
+                            files, Jump Lists, recent file records, and file hashes. The available artifacts support a
+                            connection of USB serial A55321 to the workstation, contemporaneous access to confidential
+                            materials, and cryptographic matches between corporate documents and files recovered from
+                            the drive. They do not by themselves establish which person used the workstation or what
+                            intent accompanied the transfer.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="timeline">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Chronological Investigative Timeline</h2>
+                        <p>The timeline below consolidates the connection window for USB serial A55321 with the file
+                            access and hash-match artifacts recovered during examination.</p>
+
+                        <table class="investigative-timeline">
+                            <caption>Windows artifacts ordered by reported local time</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">Event</th>
+                                    <th scope="col">Supporting artifact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="timeline-time">2:14 PM</th>
+                                    <td class="timeline-event">USB drive (serial A55321) connected.</td>
+                                    <td class="timeline-artifact">Windows System Event Log</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">2:17 PM</th>
+                                    <td class="timeline-event">Confidential folder is accessed; LNK file is created.
+                                    </td>
+                                    <td class="timeline-artifact">LNK files</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">2:17 PM – 2:27 PM</th>
+                                    <td class="timeline-event">Files are accessible via Jump List records.</td>
+                                    <td class="timeline-artifact">Jump List data and cache</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">2:20 PM – 2:27 PM</th>
+                                    <td class="timeline-event">A file matching a confidential document’s hash appears on
+                                        the USB drive.</td>
+                                    <td class="timeline-artifact">Cryptographic file hash match</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-time">2:28 PM</th>
+                                    <td class="timeline-event">USB drive disconnected.</td>
+                                    <td class="timeline-artifact">Windows Event Logs</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="technical-analysis">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Technical Analysis of Windows Artifacts</h2>
+                        <p>The employee’s workstation was examined with established forensic tools and procedures. The
+                            analysis focused on removable-storage tracking, shortcut and Jump List evidence of file
+                            access, and cryptographic comparison of recovered files against corporate originals.</p>
+
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>Removable storage</dt>
+                                <dd>Investigators parsed the <code>USBSTOR</code> Registry key, which can contain
+                                    identifying information such as the name of a connected USB device and its serial
+                                    number. Hardware configuration data is tracked in the system Registry hive, while
+                                    user file interaction is tracked from <code>NTUSER.dat</code>. Windows artifacts and
+                                    timestamps also help determine approximately when the device was connected and
+                                    disconnected, placing its use within the overall timeline. <span
+                                        class="citation">(Microsoft, 2023)</span></dd>
+                            </div>
+                            <div>
+                                <dt>LNK files &amp; Jump Lists</dt>
+                                <dd>To evaluate whether data left the workstation, investigators parsed LNK files and
+                                    Jump Lists. LNK files can record when a user accessed a file, MAC timestamps, and
+                                    the exact file path. Jump Lists can provide file paths and last-accessed
+                                    timestamps, helping connect access to confidential documents to the period when the
+                                    USB was connected. <span class="citation">(Cyber Triage, n.d.)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Cryptographic hashes</dt>
+                                <dd>Investigators hashed documents on the corporate server and compared those values
+                                    with hashes of files recovered from the USB drive. Matching hashes provide strong
+                                    evidence that the corporate file and the USB copy contain the same data. NIST
+                                    notes that cryptographic hashes can identify files and that changing a file
+                                    produces a different hash value. <span class="citation">(Nelson, Phillips, &amp;
+                                        Steuart, 2019; NIST, 2022)</span></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="interpretation">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Evidence Interpretation &amp; Limitations</h2>
+                        <p>Based on the evidence provided, USB serial A55321 was used on the workstation for about 14
+                            minutes. The drive connected at 2:14 PM, the confidential folder was accessed at 2:17 PM,
+                            and the USB disconnected at 2:28 PM. During that window, confidential materials were
+                            accessed and files matching corporate hashes appeared on the removable media. Those
+                            artifacts support the conclusion that corporate files were present on the USB during this
+                            period.</p>
+                        <p>Those findings remain subject to important constraints. Artifact context can associate
+                            activity with an account and workstation, but it cannot by itself identify the person at
+                            the keyboard. Another employee could have used the suspected employee’s workstation.
+                            Investigators should seek corroborating evidence, such as CCTV footage, before fully
+                            attributing the act.</p>
+                        <p>Investigators also cannot determine intent from these artifacts alone. The sensitivity of
+                            the files and the user’s purpose remain unknown; the transfer could reflect offline backup
+                            of the employee’s own work rather than unauthorized exfiltration. The digital evidence
+                            supports that the USB was connected and contained matching corporate data, but additional
+                            evidence would be needed to conclusively attribute the act and its intent to the employee.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="conclusion">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Conclusion</h2>
+                        <p>The defensible conclusion is that USB A55321 was connected to the workstation for about
+                            fourteen minutes, that confidential materials were accessed during that window, and that
+                            files on the drive matched corporate document hashes. The evidence does not establish who
+                            physically used the workstation or whether the transfer was intentional misconduct.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="references">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>References</h2>
+                        <ol>
+                            <li>Cyber Triage. (n.d.). <a
+                                    href="https://www.cybertriage.com/blog/what-is-a-jump-list/"><cite>What is a jump
+                                        list?</cite></a></li>
+                            <li>Microsoft. (2023). <a
+                                    href="https://learn.microsoft.com/en-us/windows-hardware/drivers/install/identifiers-generated-by-usbstor-sys"><cite>Identifiers
+                                        generated by USBSTOR.SYS</cite></a>. Microsoft Learn.</li>
+                            <li>National Institute of Standards and Technology. (2022). <a
+                                    href="https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8387.pdf"><cite>Digital
+                                        evidence preservation: Considerations for evidence handlers</cite></a> (NIST IR
+                                8387). U.S. Department of Commerce.</li>
+                            <li>Nelson, B., Phillips, A., &amp; Steuart, C. (2019). <cite>Guide to computer forensics
+                                    and investigations</cite> (6th ed.). Cengage Learning.</li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Digital Forensics notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on FTP directory traversal, intrusion detection concepts, packet analysis, and incident scoping from CodePath CYB102 Project 3.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>FTP Directory Traversal — Detection &amp; Incident Analysis / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="codepath-navigation">
+                    <h2 class="sidebar-heading" id="codepath-navigation">CodePath</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="index.html" aria-current="page">Directory Traversal</a></li>
+                        <li><a href="../dos-mitigation/index.html">DoS Mitigation</a></li>
+                        <li><a href="../splunk-ctf/index.html">Splunk CTF</a></li>
+                        <li><a href="../solarwinds-ioc-hunting/index.html">SolarWinds IOC Hunting</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">CodePath</a> / <span aria-current="page">001</span></nav>
+                <p class="article-label">Educational security lab · CYB102 · Project 3</p>
+                <h1 class="article-title">FTP Directory Traversal — Detection &amp; Incident Analysis</h1>
+                <p class="article-deck">An authorized training exercise on an intentionally vulnerable FTP service:
+                    how path validation fails, how misuse can leave network evidence, and how detection and remediation
+                    fit together.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized simulated environment for CodePath Intermediate
+                Cybersecurity. Category: network security, vulnerability analysis, and blue-team incident review. Not
+                independent hardware or malware research.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="overview">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Overview</h2>
+                        <p>This lab used a fictional organization, Wishful Thinking Inc., and an intentionally
+                            vulnerable FTP service that failed to keep file access inside its intended directory. The
+                            underlying issue was directory traversal: insufficient path validation that can allow
+                            requests to reach files outside an authorized location.</p>
+                        <p>The exercise combined offensive security concepts with defensive analysis. The point was not
+                            simply to trigger the flaw, but to understand how it works, what evidence of misuse can look
+                            like on the wire, how intrusion detection might flag it, and what remediation reduces the
+                            risk.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="technical-areas">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Technical Areas</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>Directory traversal</dt>
+                                <dd>Studied a file-access vulnerability caused by weak validation of requested paths,
+                                    and why applications must enforce filesystem boundaries.</dd>
+                            </div>
+                            <div>
+                                <dt>Intrusion detection</dt>
+                                <dd>Worked with Snort intrusion-detection concepts to identify traversal attempts,
+                                    including detection logic and alerts generated from recorded traffic. Detailed alert
+                                    artifacts from this archive are not published here.</dd>
+                            </div>
+                            <div>
+                                <dt>Packet analysis</dt>
+                                <dd>Used packet-capture concepts (including PCAPNG) to investigate which files were
+                                    accessed during the simulated incident, with emphasis on distinguishing attempted
+                                    access from completed transfers.</dd>
+                            </div>
+                            <div>
+                                <dt>Incident scoping</dt>
+                                <dd>Examined how recorded traffic can help establish incident scope. The assignment’s
+                                    expected dataset described six served requests, including four traversal-related
+                                    requests—those figures are course expectations, not independently verified results
+                                    republished from a private investigation notebook.</dd>
+                            </div>
+                            <div>
+                                <dt>Remediation</dt>
+                                <dd>Focused on server-side path validation, restricting file access to authorized
+                                    directories, and defense-in-depth measures that limit damage if a service is
+                                    compromised.</dd>
+                            </div>
+                            <div>
+                                <dt>Detection limits</dt>
+                                <dd>An optional challenge explored how request-encoding variations can evade
+                                    signature-based detection, underscoring normalization and careful detection
+                                    engineering.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="tools">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Tools &amp; Concepts</h2>
+                        <p>Snort · network packet analysis · PCAPNG · directory traversal · intrusion detection ·
+                            detection engineering · incident investigation · file access controls · input validation ·
+                            defense in depth</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="why-it-matters">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Why It Matters</h2>
+                        <p>Directory traversal is a boundary failure: the service answers a path request without
+                            proving that path stays inside the allowed tree. On a file-serving host, that can expose
+                            account data, reports, or other objects the FTP root was never meant to publish. Offensive
+                            steps in the lab make the failure concrete; defensive work—Snort-style detection, PCAP
+                            review, and hardening—shows how the same incident is scoped and contained after the fact.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="lab-artifacts">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Lab Artifacts</h2>
+                        <p>The following items are from the course submission record for the vulnerable FTP exercise.
+                            They document the local lab harness and reported access paths. They are not a full
+                            incident-response case file, and they do not include file contents, credentials, or capture
+                            extracts.</p>
+
+                        <h3 class="memo-subheading">Reflection</h3>
+                        <p>If explaining “what is a directory traversal attack” in three emojis: 🖥️🤖🐚</p>
+                        <p>A <code>.sh</code> file is used because it is a shell script that can run the lab’s command
+                            sequence through the shell.</p>
+
+                        <h3 class="memo-subheading">Harness screenshots</h3>
+                        <figure class="research-figure">
+                            <img src="attack-sh.png" alt="nano editor showing the completed attack.sh shell script"
+                                width="1280" height="800" decoding="async">
+                            <figcaption><span>Fig. 01</span> Completed lab shell script in nano.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="attack-output.png"
+                                alt="Terminal output from running the lab script against the vulnerable localhost FTP server"
+                                width="1280" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> Script run against the local vulnerable service and the
+                                resulting directory listing response.</figcaption>
+                        </figure>
+
+                        <h3 class="memo-subheading">Reported access paths</h3>
+                        <p>Paths recorded in the submission (path names only):</p>
+                        <p><code>/timmy/passwords.txt</code><br>
+                            <code>/wanda/passwords.txt</code><br>
+                            <code>/cosmo/reports_original.txt</code></p>
+
+                        <h3 class="memo-subheading">Stretch challenge</h3>
+                        <p>Optional stretch work compared account report objects through the lab harness rather than a
+                            local <code>cat</code> of the files.</p>
+                        <figure class="research-figure">
+                            <img src="real-earnings.png"
+                                alt="Terminal showing three lab script runs targeting different reports_original.txt paths"
+                                width="1280" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Stretch challenge: successive harness runs against
+                                different report paths.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to CodePath notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
