@@ -1063,6 +1063,8 @@ ul, ol { padding: 0; }
   text-transform: uppercase;
 }
 
+.project-icon-figure { max-width: 15.625rem; }
+
 .figure-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A forensic analysis of 17 hours of Cowrie SSH honeypot activity on a DigitalOcean VPS, including credential spraying, repeated authorized_keys injection, and campaign clustering.">
+  <meta name="author" content="AyaanB-DotCom">
+  <title>Cowrie Honeypot — SSH Attack Analysis / AyaanB-DotCom</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../../index.html"><span class="identity-name">AYAANB-DOTCOM</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../../index.html">Index</a><a class="nav-item is-section" href="../../research/index.html">Research</a><a class="nav-item" href="../../writing/index.html">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a class="nav-item" href="../../about/index.html">About</a><a class="nav-item" href="../../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../../index.html">Index</a><a class="sidebar-link is-section" href="../../research/index.html">Research</a><a class="sidebar-link" href="../../notes/index.html">Notes</a><a class="sidebar-link" href="../../experiments/index.html">Experiments</a><a class="sidebar-link" href="../../writing/index.html">Writing</a><a class="sidebar-link" href="../../resume/index.html">Resume</a><a class="sidebar-link" href="../../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content research-article" id="main">
+      <header class="article-header article-header-wide">
+        <nav class="document-id" aria-label="Breadcrumb"><a href="../../research/index.html">Research</a> / Detection Engineering / <a href="index.html" aria-current="page">004</a></nav>
+        <p class="article-label">Editorial research case study</p>
+        <h1 class="article-title">Cowrie Honeypot — SSH Attack Analysis</h1>
+        <p class="case-study-deck">Seventeen hours of public SSH exposure, 60 source addresses, and a repeated persistence script that connected otherwise separate sessions into one observable campaign.</p>
+        <p class="reading-note">Case study · Approximately 6 minutes</p>
+      </header>
+
+      <dl class="research-brief">
+        <div><dt>Honeypot</dt><dd>Cowrie SSH emulation</dd></div>
+        <div><dt>Cloud</dt><dd>DigitalOcean VPS</dd></div>
+        <div><dt>Analysis</dt><dd>Claude Code and manual evidence review</dd></div>
+        <div><dt>Capture</dt><dd>17 hours on March 23, 2026</dd></div>
+      </dl>
+
+      <aside class="editorial-aside" aria-label="Interpretation boundary">
+        <p class="section-kicker">Interpretation boundary</p>
+        <h3>The attackers reached an instrumented simulation—not the VPS root shell.</h3>
+        <p>Cowrie records accepted credentials, commands, file activity, and session metadata inside its emulated SSH environment. “Successful login” in this case study therefore means that Cowrie admitted the session so its behavior could be observed; it does not mean the underlying DigitalOcean host was compromised.</p>
+      </aside>
+
+      <nav class="case-study-nav" aria-label="Case study sections">
+        <ol>
+          <li><a href="#premise">Premise</a></li>
+          <li><a href="#capture">The capture</a></li>
+          <li><a href="#clusters">Behavior clusters</a></li>
+          <li><a href="#persistence">Persistence sequence</a></li>
+          <li><a href="#analysis">Analysis method</a></li>
+          <li><a href="#defense">Defensive value</a></li>
+          <li><a href="#technical-documentation">Full report</a></li>
+        </ol>
+      </nav>
+
+      <article class="case-study-body">
+        <section class="case-study-section" id="premise">
+          <p class="section-kicker">01 / Introduction</p>
+          <h2>Watching an exposed SSH service</h2>
+          <p class="section-lede">I deployed Cowrie on a DigitalOcean VPS to observe what reached a public SSH endpoint when there was no real production service behind it.</p>
+          <p>Cowrie presented an instrumented SSH environment and preserved the resulting connection, authentication, command, and session events. The deployment began receiving traffic within minutes. Most of it looked like automated credential testing: short connections, reused username-and-password pairs, and very little activity after authentication.</p>
+          <p>A smaller set behaved differently. Those sessions continued past authentication, altered the simulated <code>.ssh</code> directory, and wrote the same public key into <code>authorized_keys</code>. The repetition turned isolated events into a cluster that could be compared across source addresses.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/cowrie-live-json-log.png"><img src="images/cowrie-live-json-log.png" alt="Cowrie JSON log streaming SSH connection and client fingerprint events in a terminal" width="2158" height="822" decoding="async"></a>
+            <figcaption><span>Fig. 01</span> Live Cowrie JSON output showing connection metadata, SSH client details, and session identifiers as the public sensor received traffic.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="capture">
+          <p class="section-kicker">02 / Dataset</p>
+          <h2>Seventeen hours, four useful pivots</h2>
+          <p>The analyzed window ran from 00:07:44 through 17:12:36 UTC on March 23, 2026. The raw <code>cowrie.txt</code> record contained 60 unique source IP addresses and 76 accepted <code>root</code> authentication events. Those counts describe the honeypot’s simulated service, not access to the host operating system.</p>
+
+          <ol class="finding-register">
+            <li><div><h3>60 source addresses</h3><p>Most produced brief, automated activity consistent with broad internet scanning and credential spraying.</p></div></li>
+            <li><div><h3>76 accepted authentication events</h3><p>Cowrie admitted selected credentials so post-authentication commands and persistence attempts could be recorded.</p></div></li>
+            <li><div><h3>28 key-injection attempts</h3><p>Multiple sessions executed the same sequence and wrote the same RSA public key, creating a strong behavioral link.</p></div></li>
+            <li><div><h3>One secondary credential pivot</h3><p>The same unusual password appeared across multiple source addresses after initial access, suggesting shared tooling or campaign coordination.</p></div></li>
+          </ol>
+        </section>
+
+        <section class="case-study-section" id="clusters">
+          <p class="section-kicker">03 / Session clustering</p>
+          <h2>Two broad patterns emerged</h2>
+          <p class="section-lede">Volume alone did not separate the interesting sessions. Post-authentication behavior did.</p>
+
+          <ol class="decision-path">
+            <li><strong>Credential scanners</strong><span>High session counts, Go or libssh client strings, repeated username-and-password combinations, and little or no activity after authentication.</span></li>
+            <li><strong>Reconnaissance sessions</strong><span>Short command sequences such as <code>echo $SHELL</code>, <code>history</code>, <code>ls -la</code>, and directory navigation that resembled lightweight environment inspection.</span></li>
+            <li><strong>Persistence operators</strong><span>A repeatable script removed protections from <code>.ssh</code>, recreated the directory, appended a shared key, and restricted its permissions.</span></li>
+            <li><strong>Forwarding probe</strong><span>One source requested <code>direct-tcpip</code> connections to Google-routed addresses and <code>google.com</code> on port 443. Cowrie recorded the attempts as refused; the logs show the requests, not their intended purpose.</span></li>
+          </ol>
+
+          <p>That last distinction matters. A forwarding request could be a proxy test, an egress check, or part of another automated routine. Without a completed connection or payload, calling it command-and-control or exfiltration would go beyond the evidence.</p>
+        </section>
+
+        <section class="case-study-section" id="persistence">
+          <p class="section-kicker">04 / Repeated behavior</p>
+          <h2>The shared key was the clearest campaign marker</h2>
+          <p>The most distinctive sessions executed the same basic sequence: clear immutable and append-only attributes from the SSH directory, rebuild it, append an attacker-controlled RSA key to <code>authorized_keys</code>, and remove group and other permissions. The public key ended with the comment <code>mdrfckr</code>.</p>
+
+          <pre class="ctf-search"><code>chattr -ia .ssh
+rm -rf .ssh &amp;&amp; mkdir .ssh
+echo "ssh-rsa AAAA… mdrfckr" &gt;&gt; .ssh/authorized_keys
+chmod -R go= ~/.ssh</code></pre>
+
+          <p>The redirected key content had the SHA-256 value <code>a8460f446be540410004b1a8db4083773<wbr>fa46f7fe76fa84219c93daa1669f8f2</code>. The identical key, command order, and secondary credential form a stronger cluster than geography or source IP alone.</p>
+
+          <aside class="editorial-aside" aria-label="Campaign attribution caution">
+            <p class="section-kicker">Attribution caution</p>
+            <h3>A shared implant is evidence of common infrastructure—not a verified identity.</h3>
+            <p>The <code>mdrfckr</code> key has appeared in other public honeypot datasets and published SSH-key research. That supports treating it as a known campaign marker, but this capture alone does not prove who operated the sessions, whether every source belonged to one botnet, or which eventual payload the key would have enabled.</p>
+          </aside>
+        </section>
+
+        <section class="case-study-section" id="analysis">
+          <p class="section-kicker">05 / Method</p>
+          <h2>AI-assisted triage, evidence-led conclusions</h2>
+          <p>I analyzed the raw <code>cowrie.txt</code> output with Claude Code and a custom forensic prompt. The workflow grouped events by session and source address, extracted authentication attempts and commands, identified repeated values, and produced a first-pass timeline and IOC register.</p>
+          <p>The useful part of that automation was compression: thousands of event lines became a smaller set of pivots that could be checked against the source log. Session IDs, timestamps, client fingerprints, the repeated password, the public-key hash, and the exact command sequence remained the evidence. Labels such as “scanner,” “persistence operator,” or “proxy probe” were analytical interpretations layered on top.</p>
+          <p>This distinction also limits false certainty. The report can demonstrate that 28 sessions attempted the same key installation; it cannot infer a human operator, malware family, or monetization goal from a key comment alone.</p>
+        </section>
+
+        <section class="case-study-section" id="defense">
+          <p class="section-kicker">06 / Defensive value</p>
+          <h2>What the capture says about SSH defense</h2>
+          <p>The speed and uniformity of the activity show why a public SSH service should be assumed discoverable. The credential list included empty passwords, keyboard walks, vendor names, year-based variants, and common defaults. None was tailored to this VPS; automation made trying them inexpensive.</p>
+
+          <ol class="finding-register">
+            <li><div><h3>Remove password authentication</h3><p>Use key-based access and disable direct root login so commodity credential lists cannot open an administrative session.</p></div></li>
+            <li><div><h3>Reduce exposure</h3><p>Restrict management SSH with a cloud firewall, trusted source ranges, or a private access path instead of presenting it to the entire internet.</p></div></li>
+            <li><div><h3>Monitor durable pivots</h3><p>Alert on changes to <code>authorized_keys</code>, unexpected <code>chattr</code> activity, repeated shared credentials, and unusual SSH forwarding requests.</p></div></li>
+            <li><div><h3>Separate clustering from attribution</h3><p>Use repeated keys, command templates, credentials, and client fingerprints to group activity, while keeping identity and intent as unresolved questions.</p></div></li>
+          </ol>
+
+          <p>Cowrie’s documentation identifies its logs as the record of login attempts, accepted authentications, and commands executed in connected sessions. DigitalOcean’s guidance separately recommends SSH keys and cloud-firewall restrictions for Droplet management. Those controls address the same two conditions this dataset exposed: guessable credentials and unrestricted reachability.</p>
+        </section>
+
+        <section class="case-study-section full-documentation" id="technical-documentation">
+          <p class="section-kicker">07 / Source record</p>
+          <h2>Full forensic report</h2>
+          <p>The complete machine-assisted report preserves the event window, attacker-by-attacker session notes, timeline, observed commands, credential pivots, public-key IOC, SSH client fingerprints, and assessment. IP addresses and credentials are retained as defensive indicators from the honeypot dataset; they are historical observations, not permanent attribution.</p>
+          <a class="github-cta" href="analysis.md">Read the complete Cowrie forensic analysis <span aria-hidden="true">→</span></a>
+          <p class="documentation-links"><a href="https://cowrie.readthedocs.io/en/latest/">Cowrie documentation</a><a href="https://docs.digitalocean.com/products/networking/vpc/concepts/best-practices/">DigitalOcean security guidance</a><a href="https://www.usenix.org/system/files/sec25_slides_munteanu-cristian.pdf">Published SSH-key research</a></p>
+        </section>
+      </article>
+
+      <a class="back-link" href="../../research/index.html">← Return to Research archive</a>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p></div></footer>
+  <script src="../../script.js"></script>
+</body>
+</html>

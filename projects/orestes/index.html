@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An editorial overview of Orestes, a Nintendo DS-inspired ESP32-S3 toolkit for Wi-Fi observation, BLE discovery, signal mapping, and consensual StreetPass encounters.">
+  <meta name="author" content="AyaanB-DotCom">
+  <title>Orestes — Pocket RF Recon Toolkit / AyaanB-DotCom</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../../index.html"><span class="identity-name">AYAANB-DOTCOM</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../../index.html">Index</a><a class="nav-item is-section" href="../../research/index.html">Research</a><a class="nav-item" href="../../writing/index.html">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a class="nav-item" href="../../about/index.html">About</a><a class="nav-item" href="../../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../../index.html">Index</a><a class="sidebar-link is-section" href="../../research/index.html">Research</a><a class="sidebar-link" href="../../notes/index.html">Notes</a><a class="sidebar-link" href="../../experiments/index.html">Experiments</a><a class="sidebar-link" href="../../writing/index.html">Writing</a><a class="sidebar-link" href="../../resume/index.html">Resume</a><a class="sidebar-link" href="../../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content research-article" id="main">
+      <header class="article-header article-header-wide">
+        <nav class="document-id" aria-label="Breadcrumb"><a href="../../research/index.html">Research</a> / Embedded Wireless / <a href="index.html" aria-current="page">005</a></nav>
+        <p class="article-label">Editorial project overview</p>
+        <h1 class="article-title">Orestes — A Pocket RF Recon Toolkit</h1>
+        <p class="case-study-deck">A Nintendo DS-inspired interface for observing nearby Wi-Fi and BLE activity, mapping signal encounters, and meeting other Orestes devices from a two-inch ESP32-S3 touchscreen.</p>
+        <p class="reading-note">Project overview · Approximately 4 minutes</p>
+      </header>
+
+      <dl class="research-brief">
+        <div><dt>Platform</dt><dd>Waveshare ESP32-S3-Touch-LCD-2</dd></div>
+        <div><dt>Interface</dt><dd>240 × 320 touch display</dd></div>
+        <div><dt>Radios</dt><dd>2.4 GHz Wi-Fi and Bluetooth Low Energy</dd></div>
+        <div><dt>Operation</dt><dd>Self-contained and cloud-free</dd></div>
+      </dl>
+
+      <aside class="editorial-aside project-github-gate" aria-label="Complete documentation on GitHub">
+        <p class="section-kicker">Project snapshot</p>
+        <h3>The build instructions live on GitHub.</h3>
+        <p>This page introduces the design and research boundaries. The complete setup, dependencies, flashing procedure, controls, scoring system, pin reference, troubleshooting notes, source code, and license are maintained in the repository.</p>
+        <a class="github-cta" href="https://github.com/AyaanBhatti-dotcom/Orestes">Open the complete Orestes project on GitHub <span aria-hidden="true">→</span></a>
+      </aside>
+
+      <nav class="case-study-nav" aria-label="Project overview sections">
+        <ol>
+          <li><a href="#premise">Premise</a></li>
+          <li><a href="#device">The device</a></li>
+          <li><a href="#modules">Four modules</a></li>
+          <li><a href="#design">Design choices</a></li>
+          <li><a href="#boundary">Operating boundary</a></li>
+          <li><a href="#technical-documentation">Full project</a></li>
+        </ol>
+      </nav>
+
+      <article class="case-study-body">
+        <section class="case-study-section" id="premise">
+          <p class="section-kicker">01 / Introduction</p>
+          <h2>Turning radio observation into a handheld experience</h2>
+          <p class="section-lede">Orestes began with a simple idea: compact wireless tools do not have to feel like dense diagnostic menus.</p>
+          <p>I wanted a device that could make nearby radio activity legible at a glance and still feel playful enough to carry. The Nintendo DS became the visual cue: bold icons, direct touch interaction, encounter cards, and a lightweight progression system wrapped around practical Wi-Fi and Bluetooth observations.</p>
+          <p>The result is a self-contained toolkit. It does not need a companion phone, cloud account, or remote service. Scanning, display, encounter history, points, and badges all live on the ESP32-S3.</p>
+
+          <figure class="research-figure project-icon-figure">
+            <img src="https://github.com/user-attachments/assets/56edf997-232e-47e6-969c-d31d36156f5a" alt="Orestes project artwork for the handheld ESP32-S3 wireless toolkit" width="250" height="250" decoding="async">
+            <figcaption><span>Fig. 01</span> Orestes presents RF observation as a small, purpose-built handheld rather than a phone-dependent utility.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="device">
+          <p class="section-kicker">02 / Hardware</p>
+          <h2>A complete interface on two inches of glass</h2>
+          <p>The project runs on a Waveshare ESP32-S3-Touch-LCD-2. Its dual-core ESP32-S3 provides Wi-Fi and BLE, while 8 MB of PSRAM supports the interface and scan data. A 240 × 320 ST7789 display and CST816S touch controller turn the board into a complete handheld instead of a sensor that must report elsewhere.</p>
+          <p>That compact target shaped the software. Lists have to be readable, detail views have to prioritize the fields that matter, touch targets cannot be fragile, and scan state must remain understandable without a keyboard or terminal attached.</p>
+          <p>The full repository documents the required Arduino libraries, board profile, partition scheme, touch-driver setup, GPIO assignments, and flashing sequence.</p>
+        </section>
+
+        <section class="case-study-section" id="modules">
+          <p class="section-kicker">03 / Interaction model</p>
+          <h2>Four modules, one exploration loop</h2>
+
+          <ol class="finding-register">
+            <li><div><h3>Wi-Fi scanner</h3><p>Nearby access points become a touchable list of SSID, BSSID, signal strength, channel, encryption, and estimated distance. Selecting a row opens a focused detail view.</p></div></li>
+            <li><div><h3>BLE scanner</h3><p>Bluetooth Low Energy advertisements are organized by name, address, signal, device type, and connectable status. Other Orestes devices receive a recognizable marker.</p></div></li>
+            <li><div><h3>Scan map</h3><p>Observed signals are placed on an on-device grid so repeated scans can show density and relative movement. It is a local visualization, not a GPS-backed geographic map.</p></div></li>
+            <li><div><h3>StreetPass</h3><p>Two nearby Orestes devices can recognize one another, ask both users to confirm, and save an encounter card. Proximity influences points, while saved encounters unlock badges over time.</p></div></li>
+          </ol>
+        </section>
+
+        <section class="case-study-section" id="design">
+          <p class="section-kicker">04 / Engineering choices</p>
+          <h2>Building around the constraints</h2>
+          <p class="section-lede">The interesting work was not adding one more scanner. It was making several radio behaviors coexist inside a small embedded interface.</p>
+
+          <ol class="decision-path">
+            <li><strong>On-device first</strong><span>Scan results, encounter cards, nicknames, points, and badges stay local instead of depending on a phone or web service.</span></li>
+            <li><strong>Touch over terminal</strong><span>Rescanning, opening details, navigating lists, and confirming encounters are all direct touchscreen actions.</span></li>
+            <li><strong>Visible radio state</strong><span>The BLE scanner briefly pauses Orestes advertising while it scans, making contention between discovery and discoverability an explicit application behavior.</span></li>
+            <li><strong>Deliberate flash budget</strong><span>The interface and radio features require a larger application partition, so the build targets the board’s Huge APP layout rather than the default flash allocation.</span></li>
+          </ol>
+
+          <p>Those constraints—and the fixes for touch-driver placement, ESP32 core compatibility, upload mode, serial permissions, and BLE API differences—are documented in the repository rather than duplicated here.</p>
+        </section>
+
+        <section class="case-study-section" id="boundary">
+          <p class="section-kicker">05 / Responsible operation</p>
+          <h2>Observation for recon; consent for encounters</h2>
+          <p>The Wi-Fi module reads broadcast network metadata. It does not join networks, capture authentication handshakes, inject frames, deauthenticate clients, or attempt credential recovery. BLE discovery similarly organizes advertisements already visible to nearby receivers.</p>
+          <p>StreetPass is the intentional active exception: Orestes advertises its shared service and can connect to another Orestes unit, but an encounter is registered only after both users tap <strong>Connect</strong>. That separates observational reconnaissance from the project’s explicit, consensual peer-to-peer feature.</p>
+          <p>The toolkit is designed for education, personal experimentation, and lawful RF observation. Its value is in making nearby protocol metadata understandable—not in gaining access to another system.</p>
+        </section>
+
+        <section class="case-study-section full-documentation" id="technical-documentation">
+          <p class="section-kicker">06 / Repository</p>
+          <h2>Build Orestes from the complete project</h2>
+          <p>This overview intentionally stops before installation. GitHub contains the source code and the maintained technical record: hardware table, Arduino and ESP32 setup, Waveshare libraries, sketch layout, board settings, first-boot flow, controls, StreetPass scoring, badge requirements, known issues, pin reference, and MIT license.</p>
+          <a class="github-cta" href="https://github.com/AyaanBhatti-dotcom/Orestes">Read the complete documentation and source on GitHub <span aria-hidden="true">→</span></a>
+          <p class="documentation-links"><a href="https://github.com/AyaanBhatti-dotcom/Orestes#what-it-does">Feature overview</a><a href="https://github.com/AyaanBhatti-dotcom/Orestes#setup">Setup guide</a><a href="https://github.com/AyaanBhatti-dotcom/Orestes#known-issues">Troubleshooting</a></p>
+        </section>
+      </article>
+
+      <a class="back-link" href="../../research/index.html">← Return to Research archive</a>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p></div></footer>
+  <script src="../../script.js"></script>
+</body>
+</html>

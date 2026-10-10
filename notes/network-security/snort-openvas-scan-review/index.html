@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on installing Snort and OpenVAS, validating a custom ICMP alert, and interpreting a Greenbone scan result.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Snort ICMP Detection &amp; OpenVAS Scan Review / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="../suricata-ids-lab/index.html">Suricata IDS</a></li>
+                        <li><a href="../password-security-lab/index.html">Password Security</a></li>
+                        <li><a href="../dns-arp-mac-lab/index.html">DNS, ARP &amp; MAC</a></li>
+                        <li><a href="../honeypot-vps-analysis/index.html">Honeypot Exposure</a></li>
+                        <li><a href="../wifi-survey-router-review/index.html">Wi-Fi Survey</a></li>
+                        <li><a href="index.html" aria-current="page">Snort &amp; OpenVAS</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">009</span></nav>
+                <p class="article-label">Educational lab · IDS validation &amp; scanner interpretation</p>
+                <h1 class="article-title">Snort ICMP Detection &amp; OpenVAS Scan Review</h1>
+                <p class="article-deck">Installing Snort and OpenVAS on a rebuilt Kali VM, validating a custom ICMP
+                    alert, and separating intrusion detection from vulnerability-scan conclusions.</p>
+            </header>
+
+            <dl class="research-brief">
+                <div><dt>Environment</dt><dd>Kali Linux in VMware</dd></div>
+                <div><dt>VM resources</dt><dd>100 GB disk, 10 GB RAM, 4 cores</dd></div>
+                <div><dt>Tools</dt><dd>Snort 3, Nmap, and OpenVAS</dd></div>
+                <div><dt>Validated</dt><dd>ICMP detection—not blocking</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Scope note">
+                <strong>Scope note.</strong> The configuration work occurred in a personal lab VM. The ICMP probe
+                shown below targeted Google Public DNS only to generate observable traffic; no exploitation was
+                performed.
+            </aside>
+
+            <nav class="case-study-nav" aria-label="Lab note sections">
+                <ol>
+                    <li><a href="#build">Rebuilding the lab</a></li>
+                    <li><a href="#interface">Identifying the interface</a></li>
+                    <li><a href="#rule">Writing the rule</a></li>
+                    <li><a href="#snort">Running Snort</a></li>
+                    <li><a href="#traffic">Generating traffic</a></li>
+                    <li><a href="#openvas">Reviewing OpenVAS</a></li>
+                    <li><a href="#takeaway">Takeaway</a></li>
+                </ol>
+            </nav>
+
+            <article class="memo-document">
+                <section class="memo-section" id="build">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Rebuilding the lab</h2>
+                        <p>I began by installing Snort on a Kali virtual machine, then installed OpenVAS. During setup,
+                            I rebuilt the VM with a 100 GB virtual disk, 10 GB of RAM, and four processor cores so the
+                            vulnerability scanner had more room to operate.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/01-snort-install.png"><img src="images/01-snort-install.png"
+                                    alt="Kali terminal installing Snort packages inside a VMware virtual machine"
+                                    width="936" height="528" decoding="async"></a>
+                            <figcaption><span>Fig. 01</span> Installing Snort and its dependencies on the rebuilt Kali
+                                VM.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="interface">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Identifying the monitored interface</h2>
+                        <p>I used <code>ip a</code> to confirm the active adapter and its lab address. The VM was using
+                            <code>eth0</code> with the address <code>192.168.234.128/24</code>, which is the interface I
+                            selected when starting Snort.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/02-kali-interface.png"><img src="images/02-kali-interface.png"
+                                    alt="Kali terminal output from ip a showing eth0 and address 192.168.234.128"
+                                    width="936" height="720" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 02</span> Confirming the VM address and the <code>eth0</code>
+                                interface.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="rule">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Writing a broad ICMP detection rule</h2>
+                        <p>I added the following local rule so that Snort would report ICMP packets moving in either
+                            direction:</p>
+                        <pre><code>alert icmp any any -&gt; any any (msg:"ICMP Ping Detected"; sid:1000001; rev:1;)</code></pre>
+                        <p>The first word matters. The rule action is <code>alert</code>, so a matching packet produces
+                            an alert; the rule does not instruct Snort to drop it. Because the source and destination
+                            fields are both <code>any</code>, this lab rule intentionally matches more than just Nmap.
+                            Snort’s official rule guide describes the header action as the action applied when the rule
+                            matches.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/03-icmp-rule.png"><img src="images/03-icmp-rule.png"
+                                    alt="Nano editor showing an alert ICMP rule in the Snort local rules file"
+                                    width="936" height="528" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 03</span> The custom ICMP alert in
+                                <code>/etc/snort/rules/local.rules</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="snort">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Starting Snort in passive mode</h2>
+                        <p>I started Snort with:</p>
+                        <pre><code>sudo snort -i eth0 -R /etc/snort/rules/local.rules -A alert_fast</code></pre>
+                        <p>The command selected <code>eth0</code>, loaded the local rule file, and requested fast alerts.
+                            Snort reported one rule loaded and displayed <code>pcap DAQ configured to passive</code>.
+                            That mode is decisive: according to the official Snort documentation, passive mode can
+                            observe and detect traffic but cannot block it. Inline mode and an appropriate blocking
+                            rule action would be required for prevention.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/04-snort-passive-startup.png"><img
+                                    src="images/04-snort-passive-startup.png"
+                                    alt="Snort startup output showing one ICMP rule loaded and pcap DAQ configured to passive"
+                                    width="936" height="474" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 04</span> Snort loaded the rule and explicitly entered passive
+                                packet-processing mode.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="traffic">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Generating and observing ICMP traffic</h2>
+                        <p>I generated ICMP traffic with <code>sudo nmap -sn -PE 8.8.8.8</code>. This was a host-discovery
+                            probe, not a port or vulnerability scan: Nmap documents <code>-sn</code> as “no port scan”
+                            and <code>-PE</code> as an ICMP echo request.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/05-nmap-icmp-probe.png"><img src="images/05-nmap-icmp-probe.png"
+                                    alt="Kali terminal showing an Nmap ICMP host-discovery probe to 8.8.8.8"
+                                    width="902" height="416" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 05</span> The Nmap command generated a simple ICMP exchange. A later
+                                attempt to read <code>/var/log/snort/alert</code> found no file because the selected
+                                alert output was visible in the running terminal.</figcaption>
+                        </figure>
+
+                        <p>Snort immediately printed repeated <code>ICMP Ping Detected</code> messages for traffic
+                            between <code>192.168.234.128</code> and <code>8.8.8.8</code>. This confirms that the rule,
+                            interface selection, and alert output all worked.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/06-snort-icmp-alerts.png"><img src="images/06-snort-icmp-alerts.png"
+                                    alt="Snort alert_fast output showing repeated ICMP Ping Detected messages"
+                                    width="988" height="574" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 06</span> The custom rule detected both outbound echo requests and
+                                inbound replies.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="openvas">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Interpreting the OpenVAS result</h2>
+                        <p>I next ran an OpenVAS scan. The results view showed four entries—OS detection, hostname
+                            determination, traceroute, and CPE inventory—each with severity <code>0.0 (Log)</code>.
+                            Greenbone classifies <code>0.0</code> as a log-level result, so this screen contains useful
+                            scan information but no scored vulnerability finding.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/07-openvas-results.png"><img src="images/07-openvas-results.png"
+                                    alt="OpenVAS results page showing four informational findings with severity 0.0 Log"
+                                    width="936" height="548" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 07</span> OpenVAS returned informational results at severity 0.0,
+                                rather than a scored vulnerability.</figcaption>
+                        </figure>
+
+                        <aside class="editorial-aside" aria-label="Detection and prevention distinction">
+                            <p class="section-kicker">Evidence check</p>
+                            <h3>The screenshots demonstrate detection, not prevention.</h3>
+                            <p>The Snort session was passive and the only loaded rule used the <code>alert</code>
+                                action. It therefore could not have blocked OpenVAS in this configuration. The absence
+                                of vulnerability findings should be interpreted on its own: it may reflect the target’s
+                                exposed services, the selected scan configuration, reachability, or scan coverage, but
+                                this evidence does not identify one cause.</p>
+                        </aside>
+
+                        <p>Fail2ban works differently: it watches logs and can add firewall bans when its conditions
+                            are met. Snort can operate as an IPS when deliberately placed inline with supported packet
+                            acquisition and blocking rules, but that was not the mode used in this lab.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="takeaway">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Takeaway</h2>
+                        <p>The lab successfully validated an end-to-end IDS workflow: identify the interface, load a
+                            local rule, generate matching traffic, and confirm the alert. The OpenVAS screen separately
+                            showed that the scan produced only informational log entries. Together, the tools were
+                            useful for defensive visibility, but the evidence supports the narrower conclusion that
+                            Snort detected the ICMP traffic—not that it blocked the vulnerability scan.</p>
+                        <p>Reference material: <a href="https://docs.snort.org/start/inspection">Snort modes of
+                                operation</a>, <a href="https://docs.snort.org/rules/">Snort rule structure</a>, <a
+                                href="https://nmap.org/book/man-host-discovery.html">Nmap host discovery</a>, and <a
+                                href="https://docs.greenbone.net/GSM-Manual/gos-24.10/en/reports.html">Greenbone report
+                                severity</a>.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
