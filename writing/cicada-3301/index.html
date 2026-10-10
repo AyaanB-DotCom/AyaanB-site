@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Group research paper on Cicada 3301: the 2012 puzzles, solver community, Liber Primus, and the unrelated 2024 ransomware namesake.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Cicada 3301 Research Paper / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../index.html">Index</a><a class="nav-item"
+                    href="../../research/index.html">Research</a><a class="nav-item" href="../index.html"
+                    aria-current="page">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a
+                    class="nav-item" href="../../about/index.html">About</a><a class="nav-item"
+                    href="../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../index.html">Index</a><a class="sidebar-link"
+                        href="../../research/index.html">Research</a><a class="sidebar-link"
+                        href="../../notes/index.html">Notes</a><a class="sidebar-link"
+                        href="../../experiments/index.html">Experiments</a><a class="sidebar-link is-section"
+                        href="../index.html">Writing</a><a class="sidebar-link"
+                        href="../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="writing-navigation">
+                    <h2 class="sidebar-heading" id="writing-navigation">Writing</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="index.html" aria-current="page">Cicada 3301</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../index.html">Writing</a> / <span
+                        aria-current="page">001</span></nav>
+                <p class="article-label">Group research paper · internet mystery</p>
+                <h1 class="article-title">Cicada 3301 Research Paper</h1>
+                <p class="article-deck">Research on the Cicada 3301 puzzles, the community that formed around them,
+                    Liber Primus, and the distinction from a later ransomware group using the same name.</p>
+                <p class="reading-note">Course paper · approximately 20 minutes</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Attribution">
+                <strong>Group assignment.</strong> This paper was written as a collaborative course project. Contributor
+                names are omitted from this public archive for privacy.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="opening">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Origins</h2>
+                        <p>For most people, January 4th, 2012 was just an average day. For others, it was the beginning
+                            of one of the greatest mysteries in the cybersecurity world. A social media known as 4chan
+                            was highly popular and influential in 2012. It was simply an imageboard website, similar to
+                            what popular platforms such as Reddit are today. 4chan was a place where anyone could discuss
+                            anything. However, there was something extremely peculiar posted on January 4th. There was a
+                            message signed by 3301 that simply said: “We are looking for highly intelligent individuals.
+                            To find them, we have devised a test...” This was the first puzzle among others that was
+                            created by this mysterious group.</p>
+                        <p>To solve the first puzzle, users had to use steganography to find hidden text within the
+                            image. However, the puzzle did not stop here. Once the secret text was found, the text led
+                            to a book cipher and other forum posts. This was not the work of just some amateurs trying
+                            to confuse people on the internet. What remains striking is that we still don’t know who
+                            this was, or why.</p>
+                        <p>The mystery of Cicada 3301 was different than anything that had been seen before. The
+                            challenges required that users go to physical locations across California, Australia, South
+                            Korea, and Poland. When people would go to these locations, they were presented with a QR
+                            code attached to the logo of Cicada 3301. This meant that players around the globe had to
+                            work together to progress the challenges due to the fact that the challenge has bridged the
+                            physical and virtual landscape. However, this also meant that Cicada 3301 was a highly
+                            technical group located across the world. They were either very vast and coordinated or had
+                            financial means to travel.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="walkthrough">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>The First Puzzle</h2>
+                        <p>To give an example of what the very first puzzle posted consisted of, there’s an article
+                            posted on Boxentriq that explains how to complete it step by step. Step one involved using
+                            that message on 4chan and downloading it as an image. Once downloaded, a binary analysis was
+                            done to reveal what’s inside the image. The results show TIBERIVS CLAVDIVS CAESAR says,
+                            “cipher text”. The word Caesar indicates that the cipher text needs to be decrypted using
+                            Caesar cipher. The cipher text
+                            <code>lxxt&gt;33m2mkyv2gsq3q=w]02ntk</code> is then put into a Caesar cipher decoder. The
+                            shift number was guessed and ended up being 4, giving a link to the users. There was an
+                            image of a duck and was used to represent a fake end saying, “Whoops just decoys this way”.
+                            It also importantly said “Looks like you can’t guess how to get the message out”. This
+                            second message hints to the user to use the tool Outguess. This tool is a more advanced
+                            steganography tool that is free and can not only hide messages within an image but can also
+                            extract messages within one. So, when that image link is pasted a book code is given along
+                            with a reddit link.</p>
+                        <p>Step two involves using the images of a welcome mat and multiple paintings of a character
+                            found on the reddit link in the Outguess. The results just ensure the user taking the test
+                            that they are on the right track for completing the test as the messages are signed by 3301.
+                            On the reddit page the header which looked like an old writing style ended up being a Mayan
+                            numbering system. This String was “A2E7J6IC78H0J” posted next to it. They were then able to
+                            see that the numbers matched the Mayan numbering system therefore they began mapping the
+                            letters to the Mayan numbering system as well. The numbers are 10, 2, 14, 7, 19, 6, 18, 12,
+                            7, 8, 17, 0, 19, 7, 14, 18, 14, 19, 13, 0, 1, 2, 0. From the subreddit they used these numbers
+                            to subtract from the letters to create a new letter which ended up being a message about
+                            King Arthur. It then uses the book code to make that message even smaller to a message
+                            stating “Call us at us telephone number two one four three nine oh nine six oh eight”. The
+                            actual phone number does not work so if you wanted to complete the puzzle you would just
+                            have to read the transcript which just asks for you to find the other prime numbers in the
+                            original image. Once you find them multiply it together to the other prime number given 3301
+                            and use the result and add .com to the end of it to get access to more information. Once
+                            brought to the site, there is no more information, as the developers did not think people
+                            would make it this far. They then updated the site with the picture of a cicada showing
+                            coordinates of 14 locations and only a limited amount of people were allowed to register for
+                            email and from here the public communication is cut off. The reason why is once an email is
+                            registered the communication between cicada and the test user becomes private. This means
+                            that the first test most likely comes to an end once you reach this stage.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="community">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>The Cicada Community</h2>
+                        <p>From these puzzles came the cicada community solvers. This was a community that sprung out to
+                            spread knowledge and pieces of information that can lead to the next step of the puzzle
+                            being solved. The progress of how to solve the puzzle is left transparent to all with no
+                            steps left unhidden. How did this community begin? As mentioned before, it originated on
+                            4chan but quickly became hosted on an IRC (internet relay chat) channel. This became the
+                            natural hub of solving attempts gaining the reputation for solving where all information was
+                            shared. IRC was different from 4chan since its a chat with anonymous people without an
+                            identity tied to them. IRC instead allows for nicknames to be associated with other people
+                            you are chatting the puzzle to about. But because IRC still had this consistent problem of
+                            little to no moderation, the community solvers moved to discord. It was a free and scalable
+                            platform gaining popularity with a set of convenient tools that can be used that the other
+                            platforms lacked such as being able to implement guidelines to help prevent trolls or people
+                            that are not supposed to be within the chat. Tools that are shared involve CyberChef (open
+                            source app allowing for encode/decode), 3301 hash alarm (hashes website you come across in
+                            hopes to find the page that the book Liber Primus asks you to look for.) In a DEFCON
+                            conference one of the speakers in the video (DEFCON 31 STORIES –CRACKING CICADA) states how
+                            what differentiates this community from other solving communities is “no PGP = no Cicada”.
+                            This means any clue that the community found that is not cryptographically signed is fake
+                            and the community would make a rule on discord to not accept it. The community also set in
+                            rules to help make this chat a workshop of study sessions where people would come together
+                            and give feedback/teach on what they found instead of critiquing/ridiculing someone. Now
+                            discord has a server with over 10,000 members in it! This can be a useful group to work with
+                            if still active, in case Cicada decides to start publishing more puzzles.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="name">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Name and Symbolism</h2>
+                        <p>Based on the prime numbers you had to add, it was still a mystery as to why they were called
+                            Cicada 3301. According to the National Museum of Natural History Smithsonian site, cicadas
+                            live 13- or 17-year cycles. These numbers are both prime just like how 3301 is prime. There
+                            was no real evidence as to why it is called cicada, but cicadas shed their skin to become
+                            adults. Therefore, this is an analogy to how the users should be when working on puzzles.
+                            They should be putting all their other tasks behind when it comes to being able to focus
+                            truly on completing the puzzle which is used as a comparison to being shedding skin. That
+                            analogy made sense to include here despite not being verified by any other party. To further
+                            dive into their origins, where does their logo come from? The logo is similar to the movie,
+                            Silence of the Lambs from 1991. They are both similar as the images have secret meanings. In
+                            silence of the lambs its alternative depiction can be seen as a skull made of naked women.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="eriksson">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Perspectives on Who Was Behind Cicada</h2>
+                        <p>According to Joel Erikson (on the podcast he had with Nostalgia Nerd, a youtuber who talks
+                            about games, software, hardware, programs) who was able to solve some of Cicada 3301’s
+                            challenges, he explains who he believes was not behind this. Beforehand it’s important to
+                            note that Eriksson was not someone who had a lack of intelligence on the subject, as he was
+                            from Sweden and was a vulnerability researcher/exploit developer who has spoken at events
+                            like Defcon. This is important to note as it was almost unlikely to complete this puzzle if
+                            you had no deep experience/interest in the field. He describes that the people who were not
+                            behind this were groups such as the CIA or NSA because then they would be hypocrites. One
+                            reason is that one of the goals of the government is to advocate for freedom of speech, but
+                            when it came to talking about Cicada, they could not talk about it to anyone. In addition,
+                            if it was the government they would then be spying on their own people which is against
+                            amendments such as the 4th being that it protects people from unreasonable search and
+                            seizure. Therefore, he does not think the government would try to be sneaking around on
+                            4chan as there are too many trolls on there, he states. For an official government to be on
+                            a place with these trolls around pretending to be Cicada and posting fake clues and hints
+                            would not be very government like. Eriksson expresses his disappointment that he was not
+                            recruited despite completing the puzzle. He was disappointed because many of the people that
+                            completed the puzzle did it in groups of 20-50 people and so when it came time to register
+                            for an email to get on the private server everybody bandwagoned on to join from that group
+                            which took away many slots for those who individually completed it to get a chance to
+                            participate in the secret tasks Cicada 3301 had. Eriksson thinks that many in the group did
+                            not share the work towards completing the challenge equally resulting in “dummies” to enter
+                            this area that highly intelligent people enter. Because of this Cicada put out a post saying
+                            “We want the best, not the followers” in the message from Cicada describing how
+                            unfortunately your email did not get to go through the first come, first served stage. This
+                            outcome was especially difficult for Eriksson to accept, as he did end up completing it
+                            himself. With all that said other conspiracy theories such as Cicada being run by a cult or
+                            a terrorist group remain speculative and cannot be proven as no religious ideologies/violent
+                            evidence can be found in any clues/info accessible to the public. Therefore, instead
+                            Eriksson sees a smaller private group of old school hackers behind Cicada.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="motives">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Motives and Dead Man’s Switch</h2>
+                        <p>There were many speculations as to why the group wanted these people to solve their puzzles.
+                            Based on leaked communications that were found, Cicada 3301 was believed to have been found
+                            by some friends that believed that censorship is wrong, and that privacy is a right. Many
+                            believed that Cicada 3301 consisted of members as part of the Cypherpunk movement in the
+                            1980’s and 1990’s, which was a group of activists who advocated for the use of
+                            privacy-enhancing technologies as well as strong cryptography. The group’s primary goal was
+                            to develop privacy focused software, which would be revealed through their challenges.</p>
+                        <p>One of the first software development projects was assigned to successful candidates who were
+                            able to solve the first puzzle. The people who were able to solve the first puzzle were
+                            invited to a private chat room over the TOR network (dark web) in which they were told about
+                            why they were recruited. On the TOR network, the type of extension seen is .Onion. This type
+                            of routing makes the data source and destination untraceable by having the data get
+                            encrypted multiple times just like the layers of an onion. The special browser to access
+                            these extensions is the Tor Browser. The dark web involves the buying/selling of guns,
+                            drugs, etc. Before Tor was made public it was used by the navy to secure private
+                            communications. It was eventually made public for privacy advocates. People that made it
+                            this far had mentioned the software they wanted to create was called “Dead Man’s Switch” and
+                            Cicada 3301 wanted the people who solved the puzzle to work together on this software. This
+                            software was supposed to serve as a fail-safe mechanism which would release all information
+                            from any individual who would be considered a “whistle-blower”. However, their plan soon
+                            fails to exist due to the dynamics of the people who solved the puzzle. Although the group
+                            had successfully recruited “the best”, this also meant that they recruited highly
+                            independent people who struggled with working collaboratively. To further add on, there was
+                            a clear lack of guidance from Cicada 3301 on how they wanted the project to be structured.
+                            This caused many collisions because each person had their own idea on how they wanted the
+                            software to look like. Due to these reasons, the developers started to lose interest, and
+                            the project started to dwindle. While the successors of the first puzzle were working on
+                            Dead Man’s Switch, there were two significant events that happened. Cicada 3301 released a
+                            second puzzle, and the group was receiving the effects of the Edward Snowden leaks.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="snowden">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Disappearance After Snowden</h2>
+                        <p>Around May of 2013, Cicada 3301 ceased all production of the software and seemingly
+                            disappeared from the internet for no reason why. The dark web forum where Cicada operated
+                            was taken down without any notice, and the winners of the second puzzle were not given any
+                            information either. Many speculate that this was due to the Edward Snowden leaks, as the
+                            timing seems to align perfectly. The Snowden leaks were very significant because they made
+                            the entire cryptography community very paranoid and had everyone searched for signs of NSA
+                            surveillance, as well as any backdoors. Due to the already present conflicts of the Dead
+                            Man’s switch and the new paranoia risen from the Snowden leaks, Cicada 3301 ceased to exist
+                            for a short period of time.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="liber-primus">
+                    <p class="section-number">08</p>
+                    <div>
+                        <h2>Liber Primus</h2>
+                        <p>In 2014, Cicada 3301 emerged once again from its hiatus to release a third and final puzzle.
+                            This puzzle was not like its predecessors and was far more complex than anything anyone had
+                            ever encountered. The puzzle started off with an image which led to a message which led to a
+                            book. This book led to a link which led to what was known as the “Liber Primus”. The Liber
+                            Primus was a digital book which translates to “First Book” in Latin. The book was written in
+                            a runic alphabet which was introduced by Cicada in their earlier puzzles. The translation
+                            was deemed nearly impossible due to its heavy layers of encryption. There are many different
+                            reports which are inconsistent with how many pages are translated since the challenge was
+                            released, but they all vary around 19 pages. The first fifteen pages were cracked and
+                            essentially acted as a tutorial for the rest of the book. However, the rest of the book
+                            consisted of encryption algorithms that were completely different than just a simple shift
+                            cipher. The text is encrypted using a polyalphabetic cipher which requires a huge and
+                            complex key. To further elaborate, the text is encrypted using an OTP, which means that it’s
+                            unbreakable without the exact key. This means that not even a quantum computer would be able
+                            to solve this encryption. In the past decade, no one has been able to solve this mysterious
+                            book, and its secrets remain unrevealed. Due to the fact that Cicada 3301 relied on TOR
+                            sites and obscure subreddits and Dropbox accounts, it’s very much possible that the clues
+                            are on sites that are no longer online. Many people claim that the book is impossible to
+                            solve, and that Cicada 3301 was simply trying to bring forth a group of highly skilled and
+                            technical people together to face the problem of digital privacy and security.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="aftermath">
+                    <p class="section-number">09</p>
+                    <div>
+                        <h2>Later Silence and a Namesake Ransomware Group</h2>
+                        <p>The last message that was ever produced by Cicada 3301 was released in 2017 which stated,
+                            “Beware of false paths”. Always verify PGP signature from 7A35090F. 3301”. By then, Cicada
+                            3301 had become an internet phenomenon. Many suggested that it was just a simple ARG game,
+                            and others tried putting fake websites and information to gain attention. Since then, there
+                            have been no communications or messages from Cicada 3301. There has also been no progress in
+                            the deciphering of Liber Primus. No next step, no new clues, no guidance.</p>
+                        <p>It’s important that we distinguish this puzzle from the recent development in 2024 of a group
+                            also called Cicada 3301 but as a group that’s performing ransomware as a service attack.
+                            Ransomware essentially is an attack where someone breaks into your system, encrypts private
+                            files, and demands a ransom payment for their safe release. RAAS is using that ransomware to
+                            then be sent to other criminals who can alter/use it. In this case, a group known as Cicada
+                            3301 was found sending stolen data to other criminals. The ransomware attacks operating
+                            systems like Windows and Linux. This malware (ransomware) was created using a programming
+                            language called rust (released in 2006). It was built here as it has high performance/memory,
+                            which is important in reducing bugs, so encryption of the victims’ files is done quickly.
+                            The data that was sent to other criminals was put on the dark web, which we mentioned
+                            before. Data that’s released to the dark web is a vulnerability as any threat actor on there
+                            can screenshot it and use it later for malicious intents. Cicada 3301 targets info such as
+                            healthcare, construction, finance and technology. This range of people this has impacted is
+                            a lot less than the puzzle as its recent and only reached info from UK, U.S, Canada and
+                            Japan.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="legacy">
+                    <p class="section-number">10</p>
+                    <div>
+                        <h2>Legacy</h2>
+                        <p>Although the last puzzle by Cicada may never be solved, Cicada 3301’s legacy is one that will
+                            be talked about for the rest of cybersecurity and internet history. What started off as a
+                            simple 4chan message turned into one of the greatest rabbit holes that people have ever
+                            encountered. Cicada 3301 changed the way people viewed cryptography and security. The dark
+                            web, which is often known for its illegal activities, turned into a place where people got
+                            together to solve these challenges. Cicada 3301 showed the world how TOR could be rightfully
+                            used, not just for its horrors. Liber Primus is not just a book that can’t be translated;
+                            it’s the remnants of history. Whether or not anyone will solve Liber Primus is something
+                            only time can tell. For all that we know, it may have already been solved, or it may never
+                            be solved. The book is so sophisticated that not even the world’s smartest and most powerful
+                            computer could solve its hidden message. Whether or not AI could be used is something that
+                            may be looked upon in the near future. Although Liber Primus would not be able to be
+                            decrypted even with a quantum computer based on the nature of its encryption, it’s very much
+                            possible that AI could be leveraged into scraping the dark web for any hints or clues to
+                            solve this problem. However, the question remains the same: What are you searching for?
+                            There is no direction, no hints, and no communication. Even if Liber Primus was somehow able
+                            to be decrypted, would it even be worth solving? No one knows what the book contains, and it
+                            might be all gibberish. All that we do know is that although Cicada 3301 may never appear
+                            again, their legacy will continue to question even the most intelligent and skilled
+                            cryptographers, security experts, and hackers.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="works-cited">
+                    <p class="section-number">11</p>
+                    <div>
+                        <h2>Works Cited</h2>
+                        <ol>
+                            <li>Bassil, M. (2020, May 27). Cicada 3301: the coders still working on the internet’s
+                                strangest…. The Face.
+                                <a href="https://theface.com/life/cicada-3301-the-codebreakers-still-working-on-the-internets-strangest-mystery">https://theface.com/life/cicada-3301-the-codebreakers-still-working-on-the-internets-strangest-mystery</a>
+                            </li>
+                            <li>Johan Åhlén. (2019). Cicada 3301 First Puzzle Walkthrough | Boxentriq. Boxentriq.com.
+                                <a href="https://www.boxentriq.com/guides/cicada-3301-first-puzzle-walkthrough">https://www.boxentriq.com/guides/cicada-3301-first-puzzle-walkthrough</a>
+                            </li>
+                            <li>Lemmino. (2018). Cicada 3301: An Internet Mystery [YouTube Video]. In YouTube.
+                                <a href="https://www.youtube.com/watch?v=I2O7blSSzpI">https://www.youtube.com/watch?v=I2O7blSSzpI</a>
+                            </li>
+                            <li>aaqibz.it. (2021). 2021 02 11 NeonTempleCicada3301. Scribd.
+                                <a href="https://www.scribd.com/document/855980694/2021-02-11-NeonTempleCicada3301">https://www.scribd.com/document/855980694/2021-02-11-NeonTempleCicada3301</a>
+                            </li>
+                            <li>The Infographics Show. (2020, January 28). Cicada 3301 Super Puzzle - Internet’s Biggest
+                                Mystery. YouTube.
+                                <a href="https://www.youtube.com/watch?v=UEi9MNEP2BU">https://www.youtube.com/watch?v=UEi9MNEP2BU</a>
+                            </li>
+                            <li>Sumsub. (2025, October 3). Meet The Man That Solved Cicada 3301 Challenge! YouTube.
+                                <a href="https://www.youtube.com/watch?v=Wt8rldAjzGQ">https://www.youtube.com/watch?v=Wt8rldAjzGQ</a>
+                            </li>
+                            <li>Solving Cicada 3301 – ClevCode. (n.d.).
+                                <a href="https://clevcode.org/cicada-3301/">https://clevcode.org/cicada-3301/</a>
+                            </li>
+                            <li>NexusDiscoverer. (2025, December 13). Cicada 3301 Mystery Finally Solved 2025? - And It’s
+                                Not What We’ve Expected. YouTube.
+                                <a href="https://www.youtube.com/watch?v=YrLAog1K_Ws">https://www.youtube.com/watch?v=YrLAog1K_Ws</a>
+                            </li>
+                            <li>published, A. B. (2021, October 27). Spot the spooky optical illusion in this iconic
+                                movie poster. Creative Bloq.
+                                <a href="https://www.creativebloq.com/news/silence-of-lambs-optical-illusion">https://www.creativebloq.com/news/silence-of-lambs-optical-illusion</a>
+                            </li>
+                            <li>Solving Cicada 3301: Decoding the Internet’s Greatest Mystery. (n.d.). Www.youtube.com.
+                                <a href="https://www.youtube.com/watch?v=3ZfKfkuYwyM">https://www.youtube.com/watch?v=3ZfKfkuYwyM</a>
+                            </li>
+                            <li>Cicada3301 Ransomware: Operation &amp; Encryption Explained. (2024, November 14). VIPRE.
+                                <a href="https://vipre.com/blog/cicada3301-ransomware-operation-encryption/">https://vipre.com/blog/cicada3301-ransomware-operation-encryption/</a>
+                            </li>
+                            <li>“Periodical Cicadas | Smithsonian National Museum of Natural History.”
+                                Naturalhistory.si.edu,
+                                naturalhistory.si.edu/education/teaching-resources/life-science/periodical-cicadas.
+                            </li>
+                            <li>“CicadaSolvers – Your Headquarters for Everything Cicada 3301.” Cicadasolvers.com, 2026,
+                                www.cicadasolvers.com/. Accessed 4 May 2026.
+                            </li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Writing</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+
+</html>
