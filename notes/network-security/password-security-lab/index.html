@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on unsalted MD5 cracking with CrackStation and storing credentials in KeePassXC.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Password Hashing &amp; KeePassXC / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="../suricata-ids-lab/index.html">Suricata IDS</a></li>
+                        <li><a href="index.html" aria-current="page">Password Security</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">005</span></nav>
+                <p class="article-label">Educational lab · password security</p>
+                <h1 class="article-title">Password Hashing &amp; KeePassXC</h1>
+                <p class="article-deck">Cracking weak unsalted MD5 hashes with CrackStation, then storing credentials
+                    behind a KeePassXC master password on macOS.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Hash examples use disposable weak passwords chosen for the exercise.
+                Do not reuse any lab strings as real account passwords. Screenshots show test accounts only.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="part-1">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Part 1 · Weak MD5 Hashes</h2>
+                        <p>I started by hashing <code>apple123</code>, pasting the MD5 into CrackStation, and watching
+                            it reverse instantly.</p>
+
+                        <figure class="research-figure">
+                            <img src="01-hash-apple123.png"
+                                alt="Hash Functions page showing MD5 for apple123"
+                                width="1200" height="900" decoding="async">
+                            <figcaption><span>Fig. 01</span> MD5 of <code>apple123</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="02-crack-apple123.png"
+                                alt="CrackStation exact match recovering apple123 from its MD5"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> CrackStation exact match for
+                                <code>apple123</code>.</figcaption>
+                        </figure>
+
+                        <p>A slightly longer variant, <code>applesauce1234</code>, cracked the same way—one button,
+                            immediate hit.</p>
+
+                        <figure class="research-figure">
+                            <img src="03-hash-applesauce.png"
+                                alt="Hash Functions page showing MD5 for applesauce1234"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> MD5 of <code>applesauce1234</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="04-crack-applesauce.png"
+                                alt="CrackStation recovering applesauce1234"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> CrackStation recovering
+                                <code>applesauce1234</code>.</figcaption>
+                        </figure>
+
+                        <p>I also hashed <code>hello</code>, <code>password</code>, and
+                            <code>stophackingme</code>. All three MD5s cracked immediately when submitted together.</p>
+
+                        <figure class="research-figure">
+                            <img src="05-hash-hello.png" alt="Hash Functions MD5 for hello" width="1200" height="900"
+                                loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> MD5 of <code>hello</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="06-hash-password.png" alt="Hash Functions MD5 for password" width="1200"
+                                height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> MD5 of <code>password</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="07-hash-stophackingme.png" alt="Hash Functions MD5 for stophackingme" width="1200"
+                                height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 07</span> MD5 of <code>stophackingme</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="08-crack-batch.png"
+                                alt="CrackStation showing four exact MD5 matches for weak passwords"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 08</span> Batch CrackStation results—all exact matches.</figcaption>
+                        </figure>
+
+                        <p>Then I tried a longer, unique string that does not resemble a real password I use. That MD5
+                            came back as <strong>Not found</strong>—it was not in CrackStation’s precomputed tables.</p>
+
+                        <figure class="research-figure">
+                            <img src="09-hash-long.png"
+                                alt="Hash Functions page for a longer unique passphrase"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 09</span> Hashing a longer unique string.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="10-crack-long-miss.png"
+                                alt="CrackStation red Not found result for the longer passphrase MD5"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 10</span> Longer string: no lookup-table hit.</figcaption>
+                        </figure>
+
+                        <p>Weak unsalted hashes fall out as fast as you can click Crack. Longer unique passphrases are
+                            much less likely to sit in public rainbow/lookup tables—and real systems should also use
+                            modern salted password hashing, not bare MD5.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="part-2">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Part 2 · KeePassXC on macOS</h2>
+                        <p>On Mac I installed KeePassXC (the KeePass-family client for macOS/Linux). I used CyberChef’s
+                            To Base64 operation to build a longer master password for the database.</p>
+
+                        <figure class="research-figure">
+                            <img src="11-keepassxc-install.png"
+                                alt="macOS KeePassXC disk image installer drag to Applications"
+                                width="1000" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 11</span> Installing KeePassXC.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="12-cyberchef-master.png"
+                                alt="CyberChef To Base64 recipe used to strengthen the KeePassXC master password"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 12</span> Generating a Base64 master password in CyberChef.</figcaption>
+                        </figure>
+
+                        <p>I created a <strong>Websites</strong> group and added an entry for my MetaCTF account (plus
+                            another personal account entry during the lab). After locking and unlocking the database
+                            with the master password, I used Open URL and copy/paste to fill the login form—and signed
+                            in successfully.</p>
+
+                        <figure class="research-figure">
+                            <img src="13-add-entry.png"
+                                alt="KeePassXC Add entry dialog for MetaCTF under Websites"
+                                width="1000" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 13</span> Adding the MetaCTF entry.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="14-websites-group.png"
+                                alt="KeePassXC Websites group listing MetaCTF entry"
+                                width="1200" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 14</span> Websites group with the stored entry.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="15-open-url.png"
+                                alt="KeePassXC context menu with Open URL highlighted"
+                                width="600" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 15</span> Opening the stored URL from KeePassXC.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="16-metactf-login.png"
+                                alt="MetaCTF login page with username filled from password manager"
+                                width="1100" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 16</span> Login form filled from the vault.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="17-metactf-logged-in.png"
+                                alt="MetaCTF competitions dashboard after successful login"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 17</span> Successful login to MetaCTF.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="takeaways">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Takeaways</h2>
+                        <p>KeePassXC makes it easy to generate and store strong passwords, and the strength meter
+                            pushes you away from junk. The tradeoff is obvious: one master password (or a lost vault)
+                            is a single point of failure. I have forgotten a KeePass master password before—which is
+                            why I want to keep the tool in daily use carefully, with a master secret I can actually
+                            remember and protect.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

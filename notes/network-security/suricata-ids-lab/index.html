@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes: installing Suricata on Kali, enabling the service, and verifying alerts with testmyids.com.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Suricata IDS Setup &amp; Verification / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="index.html" aria-current="page">Suricata IDS</a></li>
+                        <li><a href="../password-security-lab/index.html">Password Security</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">004</span></nav>
+                <p class="article-label">Educational lab · intrusion detection</p>
+                <h1 class="article-title">Suricata IDS Setup &amp; Verification</h1>
+                <p class="article-deck">Installing Suricata on a Kali VM, enabling the service, and confirming it
+                    writes a real alert when traffic hits a known test signature.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Suricata was installed and tested on a local Kali virtual machine.
+                The <code>testmyids.com</code> check is a standard benign IDS self-test, not an attack on a production
+                target.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="install">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Installation</h2>
+                        <p>My first steps were installing Suricata on my Kali VM. I started with package updates, then
+                            installed Suricata and its dependencies with apt.</p>
+
+                        <figure class="research-figure">
+                            <img src="01-install.png"
+                                alt="Kali terminal installing Suricata via sudo apt install suricata -y"
+                                width="1400" height="900" decoding="async">
+                            <figcaption><span>Fig. 01</span> Installing Suricata from the Kali repositories.</figcaption>
+                        </figure>
+
+                        <p>After the packages landed, I refreshed the rule set with <code>suricata-update</code> so the
+                            engine had current Emerging Threats open rules to load.</p>
+
+                        <figure class="research-figure">
+                            <img src="02-suricata-update.png"
+                                alt="Terminal output of sudo suricata-update fetching and loading rules"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> Pulling and loading Suricata rules.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="service">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Starting and Enabling the Service</h2>
+                        <p>Once Suricata was installed, I started the service and enabled it so it would come up on
+                            boot. Then I ran <code>sudo systemctl status suricata</code> to verify it was running—status
+                            showed <code>active (running)</code> for Suricata 6.0.3 in SYSTEM mode.</p>
+
+                        <figure class="research-figure">
+                            <img src="03-enable-service.png"
+                                alt="systemctl start and enable suricata creating systemd symlink"
+                                width="1200" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Starting and enabling <code>suricata.service</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="04-status-running.png"
+                                alt="systemctl status suricata showing active running green status"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Service status confirming Suricata is active.</figcaption>
+                        </figure>
+
+                        <p>I also opened <code>sudo tail -f /var/log/suricata/fast.log</code> so I could watch the live
+                            alert log while testing.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="verify">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Verification with testmyids.com</h2>
+                        <p>To confirm the IDS was inspecting traffic, I used
+                            <code>curl http://testmyids.com</code>. That endpoint returns a short string that mimics a
+                            root shell id check—benign traffic designed to trip a well-known signature. The HTTP body
+                            came back as expected, and Suricata wrote a matching warning into
+                            <code>fast.log</code>.</p>
+
+                        <figure class="research-figure">
+                            <img src="05-testmyids-curl.png"
+                                alt="curl http://testmyids.com returning uid=0 root gid=0 root"
+                                width="1200" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> Triggering the IDS self-test with curl.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="06-fast-log-alert.png"
+                                alt="fast.log showing GPL ATTACK_RESPONSE id check returned root alert"
+                                width="1200" height="400" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> Alert in <code>fast.log</code>:
+                                <code>GPL ATTACK_RESPONSE id check returned root</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="takeaway">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Takeaway</h2>
+                        <p>Getting Suricata installed was only half the check. Starting the service, confirming
+                            <code>active (running)</code>, and seeing a live line land in <code>fast.log</code> after a
+                            known test request is what made me confident the IDS was actually watching traffic—not just
+                            installed on disk.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
