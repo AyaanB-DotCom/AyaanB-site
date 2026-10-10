@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on GPG Suite key exchange, signed encrypted email, and AEScrypt file encryption with a lab partner.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>PGP &amp; AES Email Lab / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="index.html" aria-current="page">PGP &amp; AES Email</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">002</span></nav>
+                <p class="article-label">Educational lab · cryptography</p>
+                <h1 class="article-title">PGP &amp; AES Email Lab</h1>
+                <p class="article-deck">Creating an OpenPGP key with GPG Suite, exchanging public keys with a lab
+                    partner, signing and encrypting mail, and sending an AEScrypt-protected attachment.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab and privacy note">
+                <strong>Educational lab.</strong> Partner names and emails in screenshots are redacted where they
+                appeared. Private keys and unrelated decrypted credential contents are not published here. Lab
+                passphrase screenshots from key setup (including CyberChef) are included as submitted.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="setup">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Tool Setup &amp; Key Creation</h2>
+                        <p>AEScrypt and GPG Suite were installed on macOS. Opening GPG Keychain prompted creation of a
+                            new key pair under the lab identity “Bob.” The first passphrase choice was rejected as too
+                            weak.</p>
+
+                        <figure class="research-figure">
+                            <img src="00-create-key-weak.png"
+                                alt="GPG Keychain Create new key pair dialog for Bob with an empty password strength meter"
+                                width="1400" height="900" decoding="async">
+                            <figcaption><span>Fig. 01</span> Initial key-creation dialog before a strong passphrase was
+                                set.</figcaption>
+                        </figure>
+
+                        <p>The passphrase was run through CyberChef’s <strong>To Base64</strong> operation
+                            (<code>Ilovecyber2026!</code> → <code>SWxvdmVjeWJlcjIwMjYh</code>). That Base64 string was
+                            then used as the private-key passphrase and satisfied the strength meter.</p>
+
+                        <figure class="research-figure">
+                            <img src="00b-cyberchef-base64.png"
+                                alt="CyberChef To Base64 recipe converting Ilovecyber2026! to SWxvdmVjeWJlcjIwMjYh"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> CyberChef Base64 encoding used to strengthen the
+                                passphrase.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="01-create-key.png"
+                                alt="GPG Keychain Create new key pair dialog for Bob with a strong password strength meter"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Key creation with the stronger passphrase accepted.</figcaption>
+                        </figure>
+
+                        <p>After creation, GPG offered to upload the public key to a key server. That option was
+                            declined; the public key would be exchanged by email instead.</p>
+
+                        <figure class="research-figure">
+                            <img src="02-skip-keyserver.png"
+                                alt="Dialog offering to upload the public key to a key server with No Thanks selected"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Declining public-key-server upload for this lab.</figcaption>
+                        </figure>
+
+                        <p>GPG Keychain was granted Full Disk Access so it could integrate with Mail and related data.
+                        </p>
+
+                        <figure class="research-figure">
+                            <img src="03-full-disk-access.png"
+                                alt="macOS Privacy and Security Full Disk Access with GPG Keychain enabled"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> Full Disk Access enabled for GPG Keychain.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="gpg-mail">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>GPG Mail Compatibility</h2>
+                        <p>Mail encryption did not work with the initially installed GPG Suite build. A newer beta
+                            tailored for the current macOS release (GPG Mail for Tahoe) was required before compose-time
+                            encrypt/sign controls behaved correctly.</p>
+
+                        <figure class="research-figure">
+                            <img src="04-gpg-mail-tahoe.png"
+                                alt="gpgtools.org page announcing GPG Mail beta for macOS Tahoe"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> GPG Mail beta notes for the newer macOS release.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="aes-file">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>AES File Encryption</h2>
+                        <p>A photo was encrypted with AEScrypt (passphrase <code>Encryptionsrcool!</code>) to produce
+                            an <code>.aes</code> attachment for the partner.</p>
+
+                        <figure class="research-figure">
+                            <img src="05-source-image.png"
+                                alt="Preview of the source JPEG used for the AES encryption exercise"
+                                width="900" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 07</span> Source image used for the AES step.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="06-aes-encrypted-file.png"
+                                alt="Finder preview of image.jpg.aes shown as an AES Crypt Document"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 08</span> AEScrypt output <code>image.jpg.aes</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="key-exchange">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Public-Key Exchange</h2>
+                        <p>The public key was emailed to the lab partner as an <code>.asc</code> attachment so it could
+                            be imported into their OpenPGP key manager. The message was signed; uploading a private key
+                            was never part of the intended workflow.</p>
+
+                        <figure class="research-figure">
+                            <img src="07-public-key-email.png"
+                                alt="Signed Mail compose window attaching a public key ASC file"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 09</span> Sending the public key for import.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="08-gpg-keychain.png"
+                                alt="GPG Keychain listing Bob sec/pub key plus imported partner and GPGTools keys"
+                                width="1400" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 10</span> Local keychain after partner public-key import.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="encrypted-mail">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Signed &amp; Encrypted Mail</h2>
+                        <p>Before a message could show both the encrypt (lock) and sign (checkmark) indicators in Mail,
+                            the partner’s public key had to be imported. An early attempt encrypted to the wrong key
+                            (own key instead of the partner’s), so the key material was remade and the message was
+                            re-encrypted for the partner’s public key, signed with the local private key, and sent with
+                            the AES attachment.</p>
+
+                        <figure class="research-figure">
+                            <img src="09-select-recipients.png"
+                                alt="GPG Services Select Recipients dialog with partner key selected and Sign checked"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 11</span> Choosing the recipient public key and signing.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="10-final-encrypted-email.png"
+                                alt="Mail compose window with PGP ciphertext body, AES attachment, lock and checkmark icons"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 12</span> Final outbound message: OpenPGP body plus
+                                <code>image.jpg.aes</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="partner-reply">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Partner Reply &amp; Decryption</h2>
+                        <p>The first reply from the partner attached a public key and double-encrypted a text file, but
+                            did not encrypt the email body itself. A corrected encrypted message followed.</p>
+
+                        <figure class="research-figure">
+                            <img src="11-partner-email-v1.png"
+                                alt="Incoming partner email with public key and double-encrypted text attachment"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 13</span> First partner message (body not encrypted).</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="12-partner-email-v2.png"
+                                alt="Partner email banner stating This message is encrypted with AES and key attachments"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 14</span> Corrected encrypted partner message.</figcaption>
+                        </figure>
+
+                        <p>The partner’s text attachment decrypted with the local private key. The assignment PDF
+                            attachment decrypted successfully but initially failed to preview on macOS (Windows/Mac
+                            packaging oddity); renaming the extension to <code>.pdf</code> opened it normally.</p>
+
+                        <figure class="research-figure">
+                            <img src="13-pdf-format-issue.png"
+                                alt="macOS file icon showing Assignment.PDF with unknown document question mark"
+                                width="600" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 15</span> Decrypted file before the extension fix.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="14-decrypted-assignment.png"
+                                alt="Preview of Assignment.pdf showing dog ate my homework meme content"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 16</span> Opened assignment after setting the
+                                <code>.pdf</code> extension.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="takeaways">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Takeaways</h2>
+                        <p>Public keys are what you exchange; private keys stay local. Mail encrypts to the
+                            <em>recipient’s</em> public key and signs with your private key—encrypting only to yourself
+                            leaves the partner unable to read the message. Layering AEScrypt on an attachment adds a
+                            separate symmetric secret that still has to be conveyed out of band or inside a properly
+                            encrypted channel. Tooling quirks (macOS Mail integration betas, cross-platform file
+                            extensions) showed up as much as the crypto itself.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
