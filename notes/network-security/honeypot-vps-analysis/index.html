@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes comparing Cowrie and Dionaea honeypots on disposable VPS instances through Nmap and Nessus service-exposure analysis.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Cowrie &amp; Dionaea: Reading Service Exposure / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="../suricata-ids-lab/index.html">Suricata IDS</a></li>
+                        <li><a href="../password-security-lab/index.html">Password Security</a></li>
+                        <li><a href="../dns-arp-mac-lab/index.html">DNS, ARP &amp; MAC</a></li>
+                        <li><a href="index.html" aria-current="page">Honeypot Exposure</a></li>
+                        <li><a href="../wifi-survey-router-review/index.html">Wi-Fi Survey</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">007</span></nav>
+                <p class="article-label">Educational lab · honeypot deployment &amp; validation</p>
+                <h1 class="article-title">Cowrie &amp; Dionaea: Reading Service Exposure</h1>
+                <p class="article-deck">Deploying two different honeypots on disposable VPS instances—and learning
+                    why a scanner’s CVE list is only the beginning of the analysis.</p>
+            </header>
+
+            <dl class="research-brief">
+                <div><dt>Honeypots</dt><dd>Cowrie and Dionaea</dd></div>
+                <div><dt>Environment</dt><dd>Linux VPS instances and Kali VM</dd></div>
+                <div><dt>Observation</dt><dd>Nmap service detection, NSE, and Nessus</dd></div>
+                <div><dt>Primary lesson</dt><dd>Banner correlation is not vulnerability confirmation</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Authorization and historical address note">
+                <strong>Authorized lab scope.</strong> Both honeypots ran on VPS instances under my control, and scans
+                were limited to those endpoints. The screenshots preserve historical lab addresses that may now be
+                reassigned; they should not be treated as current testing targets.
+            </aside>
+
+            <nav class="case-study-nav" aria-label="Lab note sections">
+                <ol>
+                    <li><a href="#premise">Premise</a></li>
+                    <li><a href="#cowrie">Cowrie</a></li>
+                    <li><a href="#scanner-output">Reading the output</a></li>
+                    <li><a href="#dionaea">Dionaea</a></li>
+                    <li><a href="#comparison">Comparison</a></li>
+                    <li><a href="#takeaway">Takeaway</a></li>
+                    <li><a href="#references">References</a></li>
+                </ol>
+            </nav>
+
+            <article class="memo-document">
+                <section class="memo-section" id="premise">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>The premise</h2>
+                        <p>My first deployment used <a href="https://docs.cowrie.org/en/latest/">Cowrie</a>, an SSH and
+                            Telnet honeypot designed to record attacker interactions. I installed it on a VPS instead
+                            of exposing a service from my own computer or home network. Later, I deployed
+                            <a href="https://github.com/DinoTools/dionaea">Dionaea</a>, a low-interaction honeypot that
+                            presents a wider collection of network services.</p>
+                        <p>The two tools created a useful comparison. Cowrie concentrated on the path into an SSH-like
+                            system. Dionaea exposed FTP, HTTP, SMB, SQL, and other decoy services associated with
+                            malware delivery. The lab question became less about how many “vulnerabilities” a scanner
+                            could print and more about what those results actually described: the Linux host, the
+                            honeypot, or an intentionally fabricated banner.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="cowrie">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Cowrie: separating the host from the decoy</h2>
+                        <p>After installing Cowrie, I used <code>ip a</code> to identify the VPS interface and confirm
+                            the address assigned to <code>eth0</code>.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/cowrie-interface-address.png"><img
+                                    src="images/cowrie-interface-address.png"
+                                    alt="Cowrie VPS terminal showing network interfaces and the address assigned to eth0"
+                                    width="780" height="520" decoding="async"></a>
+                            <figcaption><span>Fig. 01</span> Confirming the Cowrie VPS network interface before scanning.
+                            </figcaption>
+                        </figure>
+
+                        <p>From a Kali VM, I ran
+                            <code>nmap -sV -p 22,2222 [Cowrie VPS] -v</code>. The <code>-p</code> option limited the
+                            scan to ports 22 and 2222, while <code>-sV</code> sent probes to identify the services and
+                            versions responding on those ports.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/cowrie-service-scan.png"><img src="images/cowrie-service-scan.png"
+                                    alt="Nmap version scan showing the VPS SSH service on port 22 and Cowrie on port 2222"
+                                    width="680" height="478" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 02</span> Port 22 returned the real Ubuntu host’s OpenSSH banner;
+                                port 2222 returned Cowrie’s Debian OpenSSH presentation.</figcaption>
+                        </figure>
+
+                        <p>That distinction matters. Port 22 was the management service for the actual VPS. Port 2222
+                            was the instrumented surface Cowrie presented to visitors. A result tied to port 2222 could
+                            describe the identity Cowrie was simulating rather than software truly installed on the
+                            host.</p>
+
+                        <p>I also configured a Nessus Basic Network Scan against the lab instance. The results page
+                            recorded one low-severity item and seventeen informational observations—not eighteen
+                            independently verified exploitable vulnerabilities.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/cowrie-nessus-config.png"><img src="images/cowrie-nessus-config.png"
+                                    alt="Nessus Essentials Basic Network Scan configuration for the Cowrie lab VPS"
+                                    width="884" height="474" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 03</span> Configuring the authorized Cowrie scan in Nessus.
+                            </figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <a href="images/cowrie-nessus-results.png"><img src="images/cowrie-nessus-results.png"
+                                    alt="Nessus results with one low-severity item and informational service findings"
+                                    width="906" height="486" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 04</span> Nessus separated the single low-severity result from
+                                service-discovery and configuration information.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="scanner-output">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Reading a long CVE list carefully</h2>
+                        <p>I followed the service scan with an NSE vulnerability pass using
+                            <code>nmap -sV --script vuln [Cowrie VPS]</code>. The output was long, so I initially used
+                            Google Gemini to summarize the most important and interesting-looking entries. That helped
+                            triage the screen, but it did not validate any vulnerability.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/cowrie-nmap-correlations.png"><img
+                                    src="images/cowrie-nmap-correlations.png"
+                                    alt="Nmap output listing many CVE correlations for the OpenSSH banner presented on Cowrie port 2222"
+                                    width="936" height="692" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 05</span> CVE correlations generated from the service identity on
+                                the honeypot port. The list is evidence about the banner match, not proof that each CVE
+                                is exploitable.</figcaption>
+                        </figure>
+
+                        <aside class="editorial-aside" aria-label="Interpretation rule">
+                            <p class="section-kicker">Interpretation rule</p>
+                            <h3>A scanner report is a lead, not a verdict.</h3>
+                            <p>Version detection works by comparing responses with recognizable service patterns.
+                                Honeypots deliberately produce recognizable responses. Every reported CVE therefore
+                                needs to be mapped back to the correct layer and checked against the installed package,
+                                vendor advisory, configuration, and—when appropriate—a safe validation method.</p>
+                        </aside>
+
+                        <p>The host-side SSH banner included OpenSSH <code>9.6p1-3ubuntu13.13</code>. One correlation
+                            raised <a href="https://ubuntu.com/security/CVE-2024-6387">CVE-2024-6387</a>, the OpenSSH
+                            signal-handling regression commonly called “regreSSHion.” Ubuntu lists
+                            <code>1:9.6p1-3ubuntu13.3</code> as the fixed package for Ubuntu 24.04 LTS. The revision
+                            visible in the screenshot is newer than that fixed baseline, which is consistent with the
+                            follow-up conclusion that the host had already been patched.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="dionaea">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Dionaea: a wider service surface</h2>
+                        <p>Dionaea’s native installation guidance was oriented toward an older environment than the
+                            VPS I was using, so I chose the project’s Docker image. The first package-install attempt
+                            encountered an <code>apt</code> lock held by another process; after checking that process,
+                            the package update and Docker installation proceeded.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/dionaea-docker-install.png"><img src="images/dionaea-docker-install.png"
+                                    alt="VPS terminal showing an apt lock error followed by Docker package installation"
+                                    width="936" height="452" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 06</span> Resolving the package-manager lock before installing
+                                Docker.</figcaption>
+                        </figure>
+
+                        <p>I pulled <code>dinotools/dionaea</code> and mapped the ports used by Dionaea’s decoy
+                            services. The capture records the image download and launch command. It also shows an empty
+                            <code>docker ps</code> result at that moment, a reminder that pulling an image is not the
+                            same as proving a container remains healthy and running.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/dionaea-container-launch.png"><img
+                                    src="images/dionaea-container-launch.png"
+                                    alt="Docker pulling and launching the Dionaea image with multiple published ports"
+                                    width="936" height="430" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 07</span> Pulling the official image and publishing Dionaea’s decoy
+                                service ports; runtime state still required a separate check.</figcaption>
+                        </figure>
+
+                        <p>After confirming the second VPS address, I ran
+                            <code>nmap -sV -A [Dionaea VPS] -v</code>. The <code>-A</code> option enabled several
+                            advanced detection features, including version detection and default NSE scripts. It also
+                            made this a noisier scan appropriate only for an authorized target.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/dionaea-interface-address.png"><img
+                                    src="images/dionaea-interface-address.png"
+                                    alt="Dionaea VPS terminal showing the public address, Docker bridge, and container interface"
+                                    width="798" height="522" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 08</span> The VPS interface alongside the Docker bridge and container
+                                network.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/dionaea-service-scan.png"><img src="images/dionaea-service-scan.png"
+                                    alt="Nmap aggressive service scan showing FTP, SSH, HTTP, SMB, SQL, MySQL, and SIP services on the Dionaea VPS"
+                                    width="862" height="684" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 09</span> Dionaea presented FTP, HTTP, SMB, SQL, MySQL, SIP, and
+                                other services from a Linux host. Windows-oriented fingerprints were part of the
+                                emulation surface.</figcaption>
+                        </figure>
+
+                        <p>The scan’s Windows-like results were the point, not a contradiction. Dionaea supports
+                            protocols including SMB and MSSQL, so a Linux container can imitate service behavior that
+                            resembles a Windows system. Later vulnerability correlations referenced EternalBlue and
+                            DoublePulsar on the emulated SMB service; those names did not establish that the Linux VPS
+                            itself was a vulnerable Windows machine.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/dionaea-nmap-correlations.png"><img
+                                    src="images/dionaea-nmap-correlations.png"
+                                    alt="Nmap output listing numerous version-based CVE correlations for services exposed on the Dionaea VPS"
+                                    width="882" height="748" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 10</span> The long correlation list combined real host services with
+                                honeypot-facing service identities and therefore required port-by-port interpretation.
+                            </figcaption>
+                        </figure>
+
+                        <p>Port 22 remained different: it belonged to the actual VPS host and had to be assessed as
+                            real infrastructure. I retired the disposable VPS rather than leave uncertain exposure in
+                            place. A later advisory comparison showed that the banner-reported Ubuntu OpenSSH revision
+                            was newer than Ubuntu’s listed fixed revision for CVE-2024-6387, but package-manager and
+                            configuration checks—not a banner alone—are the appropriate way to confirm patch status.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="comparison">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>What each honeypot is useful for</h2>
+                        <ol class="decision-path">
+                            <li><strong>Cowrie</strong><span>Focuses on SSH and Telnet behavior: login attempts,
+                                    commands, downloaded files, and the steps an intruder takes after apparent access.
+                                </span></li>
+                            <li><strong>Dionaea</strong><span>Presents a broader set of services used to observe
+                                    malware delivery and exploitation attempts across protocols such as SMB, FTP, HTTP,
+                                    and database services.</span></li>
+                            <li><strong>Host layer</strong><span>Remains genuine infrastructure. Administrative SSH,
+                                    Docker, the operating system, and firewall rules require ordinary hardening even
+                                    when the public-facing application is intentionally deceptive.</span></li>
+                            <li><strong>Scanner layer</strong><span>Describes what remote probes received. Results must
+                                    be attributed to the host or decoy before CVE names can be treated as meaningful
+                                    findings.</span></li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="takeaway">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Takeaway</h2>
+                        <p>Honeypots are useful because they make attacker behavior observable, but they also make
+                            automated scan output unusually easy to misread. Cowrie showed how an SSH-focused decoy can
+                            be separated from the host’s real management service. Dionaea showed how one Linux system
+                            can intentionally present a collection of Windows- and malware-facing protocols.</p>
+                        <p>The durable lesson was to identify the layer first, then investigate the finding. A long CVE
+                            list may describe a decoy banner, a genuine package, or a heuristic match. Only validation
+                            against the actual host state turns that list into a defensible security conclusion.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="references">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>References</h2>
+                        <ol>
+                            <li><a href="https://docs.cowrie.org/en/latest/"><cite>Cowrie documentation</cite></a> —
+                                installation, configuration, deployment, and output guidance.</li>
+                            <li><a href="https://github.com/DinoTools/dionaea"><cite>Dionaea official
+                                        repository</cite></a> and <a
+                                    href="https://github.com/DinoTools/dionaea/blob/master/docker/README.md">Docker
+                                    deployment reference</a>.</li>
+                            <li>Nmap Project. <a href="https://nmap.org/book/man-version-detection.html"><cite>Service
+                                        and Version Detection</cite></a>.</li>
+                            <li>Nmap Project. <a href="https://nmap.org/book/nse-usage.html"><cite>Nmap Scripting
+                                        Engine: Usage and Examples</cite></a>.</li>
+                            <li>Ubuntu Security. <a href="https://ubuntu.com/security/CVE-2024-6387"><cite>CVE-2024-6387
+                                        status and fixed package versions</cite></a>.</li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

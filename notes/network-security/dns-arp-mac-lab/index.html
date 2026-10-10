@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on theHarvester, dnsenum, local hosts-file name overrides, ARP cache edits, and MAC spoofing in VMware.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>DNS, ARP &amp; MAC Lab / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="../suricata-ids-lab/index.html">Suricata IDS</a></li>
+                        <li><a href="../password-security-lab/index.html">Password Security</a></li>
+                        <li><a href="index.html" aria-current="page">DNS, ARP &amp; MAC</a></li>
+                        <li><a href="../honeypot-vps-analysis/index.html">Honeypot Exposure</a></li>
+                        <li><a href="../wifi-survey-router-review/index.html">Wi-Fi Survey</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">006</span></nav>
+                <p class="article-label">Educational lab · name resolution &amp; link layer</p>
+                <h1 class="article-title">DNS Enumeration, Hosts Overrides, ARP &amp; MAC Spoofing</h1>
+                <p class="article-deck">OSINT and DNS enum on Kali, a local hosts-file redirect in a Windows 10 VM,
+                    then ARP cache edits and Technitium MAC spoofing between two lab VMs.</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Hosts, ARP, and MAC steps ran on personal VMware Windows 10 guests
+                only. Public-domain DNS lookups (YouTube, college sites used as resolution targets) were passive
+                enumeration for coursework—not abuse of those networks. Do not apply hosts or MAC changes on systems
+                you do not own or administer.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="osint">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Part 1 · theHarvester &amp; dnsenum</h2>
+                        <p>I started with three theHarvester runs and got nothing useful back—empty IP/email/host
+                            counts, plus API-key and source errors on a broader <code>-b all</code> pass.</p>
+
+                        <figure class="research-figure">
+                            <img src="01-harvester-duckduckgo.png"
+                                alt="theHarvester DuckDuckGo run with no IPs, emails, or people found"
+                                width="1200" height="900" decoding="async">
+                            <figcaption><span>Fig. 01</span> theHarvester over DuckDuckGo—no results.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="02-harvester-youtube-all.png"
+                                alt="theHarvester against www.youtube.com with -b all failing a source"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> <code>-b all</code> against YouTube hit source
+                                failures.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="03-harvester-youtube-empty.png"
+                                alt="theHarvester log showing 0 hosts, 0 IPs, 0 emails for youtube.com"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Completed sources still reported zero hosts/IPs/emails.
+                            </figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="04-harvester-spotify.png"
+                                alt="theHarvester on www.spotify.com via DuckDuckGo with no results"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Same empty outcome for Spotify via DuckDuckGo.</figcaption>
+                        </figure>
+
+                        <p>dnsenum was more productive. Against YouTube I got A records, Google name servers, and MX
+                            addresses. A second run against a university hostname returned host addresses (Cloudflare)
+                            but stopped when no NS record existed for the <code>www</code> label.</p>
+
+                        <figure class="research-figure">
+                            <img src="06-dnsenum-youtube.png"
+                                alt="dnsenum youtube.com showing host addresses, NS, and MX records"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> dnsenum on <code>youtube.com</code>—A, NS, and MX
+                                output.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="05-dnsenum-university.png"
+                                alt="dnsenum on a university www hostname stopping with no NS record error"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> University <code>www</code> target: addresses found, then
+                                “no NS record” halt.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="hosts">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Part 2 · Local Hosts Redirect</h2>
+                        <p>In the Windows 10 VM I resolved both sites first: <code>www.wku.edu</code> mapped to
+                            <code>161.6.96.74</code> (ICMP timed out), and <code>www.ivytech.edu</code> answered from
+                            its real CDN address before any hosts change.</p>
+
+                        <figure class="research-figure">
+                            <img src="07-ping-wku.png"
+                                alt="ping www.wku.edu resolving to 161.6.96.74 with request timed out"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 07</span> WKU resolves to <code>161.6.96.74</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="08-ping-ivytech-before.png"
+                                alt="ping www.ivytech.edu before hosts edit resolving to real CDN IP"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 08</span> Ivy Tech resolution before the hosts override.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="13-ivytech-baseline.png"
+                                alt="Firefox loading the real Ivy Tech homepage"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 09</span> Browser baseline: real Ivy Tech site.</figcaption>
+                        </figure>
+
+                        <p>I opened the system <code>hosts</code> file in Notepad as Administrator and added
+                            <code>161.6.96.74</code> mapped to <code>www.ivytech.edu</code>.</p>
+
+                        <figure class="research-figure">
+                            <img src="09-hosts-notepad.png"
+                                alt="Windows hosts file open in Notepad before custom mapping"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 10</span> Editing <code>hosts</code> as Administrator.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="10-hosts-redirect.png"
+                                alt="hosts file entry mapping 161.6.96.74 to www.ivytech.edu"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 11</span> Mapping Ivy Tech’s name to WKU’s IP.</figcaption>
+                        </figure>
+
+                        <p>At first the redirect did not stick. I flushed the resolver cache, turned Firefox DNS over
+                            HTTPS off so the browser would honor the system resolver, and retested in a private
+                            window. After that, navigating to <code>www.ivytech.edu</code> served the WKU site content
+                            from the overridden address.</p>
+
+                        <figure class="research-figure">
+                            <img src="11-flushdns.png"
+                                alt="ipconfig /flushdns succeeding after ping of WKU"
+                                width="1000" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 12</span> <code>ipconfig /flushdns</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="12-firefox-doh-off.png"
+                                alt="Firefox Secure DNS set to Off so system DNS and hosts are used"
+                                width="1100" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 13</span> Firefox “DNS over HTTPS” set to Off.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="14-wku-site.png"
+                                alt="WKU homepage shown in Firefox private browsing"
+                                width="1200" height="800" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 14</span> WKU content after the local name override took
+                                effect.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="arp">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Part 3 · ARP Between Two Windows VMs</h2>
+                        <p>I ran two Windows 10 instances (original + clone). On each I collected
+                            <code>ipconfig /all</code> and <code>arp -a</code>, cleared the default gateway for the
+                            exercise, then rebuilt neighbor learning by pinging the peer.</p>
+
+                        <figure class="research-figure">
+                            <img src="15-ipconfig-vm1.png"
+                                alt="ipconfig /all on first Windows 10 VM with blank default gateway"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 15</span> VM1 addressing after removing the default
+                                gateway.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="16-ipconfig-arp-clone.png"
+                                alt="Clone VM ipconfig /all and arp -a showing peer MAC"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 16</span> Clone VM: <code>ipconfig /all</code> and
+                                <code>arp -a</code>.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="17-arp-a-vm1.png"
+                                alt="arp -a on VM1 showing gateway MAC only"
+                                width="900" height="500" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 17</span> Early ARP table on VM1.</figcaption>
+                        </figure>
+
+                        <p>I deleted a cache entry, pinged the victim VM (timeouts were expected with the gateway
+                            gone), confirmed a dynamic peer entry appeared, then cleared the table again after adding
+                            a static mapping for the exercise.</p>
+
+                        <figure class="research-figure">
+                            <img src="18-arp-d-ping.png"
+                                alt="arp -d then ping to peer VM timing out"
+                                width="1000" height="600" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 18</span> Delete ARP entry, then ping the peer.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="19-arp-a-after-ping.png"
+                                alt="arp -a showing dynamic entry for peer 192.168.194.128"
+                                width="1000" height="700" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 19</span> Peer MAC learned after contact attempts.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="20-arp-s-d.png"
+                                alt="arp -s static entry then arp -d flush"
+                                width="1000" height="500" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 20</span> Static <code>arp -s</code>, then flush with
+                                <code>arp -d</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="mac">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Part 4 · MAC Address Spoofing</h2>
+                        <p>I installed Technitium MAC Address Changer (TMAC) on the Windows 10 guest and set a Netgear
+                            OUI. The <code>2C-30-33</code> prefix associates with NETGEAR networking gear; using
+                            <code>02</code> as the first octet is a common lab pattern for a locally administered
+                            address that no longer matches the NIC’s burned-in MAC.</p>
+
+                        <figure class="research-figure">
+                            <img src="21-tmac-netgear.png"
+                                alt="TMAC with Netgear vendor MAC 2C-30-33-B2-6D-B3 entered"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 21</span> Choosing a Netgear-style MAC in TMAC.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="22-tmac-success.png"
+                                alt="TMAC dialog confirming MAC address changed successfully"
+                                width="1200" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 22</span> TMAC reporting a successful change.</figcaption>
+                        </figure>
+
+                        <p>Spoofing was trivial in the VM—which is the point of the lab: a threat actor can present a
+                            MAC that looks like trusted vendor hardware, including addresses that might sit on a
+                            whitelist, unless the network uses stronger controls than MAC alone.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

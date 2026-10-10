@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes from a redacted WiFiInfoView survey and a review of wireless, guest-network, and access-control settings in a router emulator.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Wi-Fi Survey &amp; Router Configuration Review / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="network-security-navigation">
+                    <h2 class="sidebar-heading" id="network-security-navigation">Network Security</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../metasploitable-lab-setup/index.html">Metasploitable Assessment</a></li>
+                        <li><a href="../pgp-aes-email-lab/index.html">PGP &amp; AES Email</a></li>
+                        <li><a href="../remote-access-malware-lab/index.html">Remote Access Malware</a></li>
+                        <li><a href="../suricata-ids-lab/index.html">Suricata IDS</a></li>
+                        <li><a href="../password-security-lab/index.html">Password Security</a></li>
+                        <li><a href="../dns-arp-mac-lab/index.html">DNS, ARP &amp; MAC</a></li>
+                        <li><a href="../honeypot-vps-analysis/index.html">Honeypot Exposure</a></li>
+                        <li><a href="index.html" aria-current="page">Wi-Fi Survey</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Network Security</a> / <span aria-current="page">008</span></nav>
+                <p class="article-label">Educational lab · wireless reconnaissance &amp; configuration review</p>
+                <h1 class="article-title">Wi-Fi Survey &amp; Router Configuration Review</h1>
+                <p class="article-deck">A passive look at nearby wireless metadata, followed by a security review of
+                    channel, encryption, guest-network, and access-control settings in a router emulator.</p>
+            </header>
+
+            <dl class="research-brief">
+                <div><dt>Survey tool</dt><dd>WiFiInfoView on Windows</dd></div>
+                <div><dt>Observed fields</dt><dd>Signal, channel, PHY, security, cipher, and vendor</dd></div>
+                <div><dt>Configuration</dt><dd>TRENDnet TEW-818DRU emulator</dd></div>
+                <div><dt>Scope</dt><dd>Passive observation and interface review</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Privacy and credential note">
+                <strong>Privacy note.</strong> Nearby SSIDs, BSSIDs, and location-sensitive fields are redacted. A
+                supplied screenshot that revealed a plaintext passphrase is intentionally not published. No networks
+                were joined, disrupted, or tested through this survey.
+            </aside>
+
+            <nav class="case-study-nav" aria-label="Lab note sections">
+                <ol>
+                    <li><a href="#tool-check">Tool check</a></li>
+                    <li><a href="#survey">Passive survey</a></li>
+                    <li><a href="#wireless-settings">Wireless settings</a></li>
+                    <li><a href="#security">Security policy</a></li>
+                    <li><a href="#guest-network">Guest network</a></li>
+                    <li><a href="#access-control">Access control</a></li>
+                    <li><a href="#takeaway">Takeaway</a></li>
+                </ol>
+            </nav>
+
+            <article class="memo-document">
+                <section class="memo-section" id="tool-check">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Checking the tool before running it</h2>
+                        <p>I downloaded WiFiInfoView to inspect nearby wireless-network metadata. It did not work in my
+                            virtual machines because they did not have direct access to a compatible Wi-Fi interface,
+                            and Windows location access was required before the physical system would expose scan
+                            results.</p>
+                        <p>Before launching the executable, I submitted it to VirusTotal. Two of 72 security engines
+                            flagged the file. The remaining results and detection details made those two alerts look
+                            like likely false positives, but that is not the same as proving a file safe. The result
+                            should be combined with the download source, file hash, signature information, and local
+                            behavior.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/01-virustotal-screening.png"><img
+                                    src="images/01-virustotal-screening.png"
+                                    alt="VirusTotal results for WiFiInfoView showing two detections out of 72 engines"
+                                    width="936" height="498" decoding="async"></a>
+                            <figcaption><span>Fig. 01</span> Two engines raised detections; most reported the file as
+                                undetected. This was a screening signal, not a definitive safety verdict.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="survey">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>What a passive Wi-Fi survey reveals</h2>
+                        <p>Once the tool ran, many of the SSIDs were familiar because I regularly work with ESP32 and
+                            Raspberry Pi devices. WiFiInfoView organized information I had previously encountered while
+                            inspecting my own Wi-Fi captures in Wireshark: signal strength, channel, PHY type, security
+                            policy, cipher, advertised speed, channel width, vendor, and router-identifying fields.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/02-wifiinfoview-redacted-overview.png"><img
+                                    src="images/02-wifiinfoview-redacted-overview.png"
+                                    alt="Redacted WiFiInfoView table showing signal, frequency, channel, company, security, cipher, and channel width columns"
+                                    width="1506" height="844" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 02</span> The redacted survey view. Network names, hardware
+                                addresses, and other location-sensitive identifiers are withheld.</figcaption>
+                        </figure>
+
+                        <p>An SSID may be absent because the access point is out of range, powered down, operating on a
+                            band the adapter is not scanning, or configured not to broadcast its network name. Hiding
+                            the SSID does not provide meaningful security by itself: the access point’s BSSID and other
+                            management traffic remain observable, and the network name can often be inferred when
+                            clients connect. WPA2 or WPA3 authentication and a strong unique passphrase are the actual
+                            access controls.</p>
+
+                        <aside class="editorial-aside" aria-label="MAC address distinction">
+                            <p class="section-kicker">Important distinction</p>
+                            <h3>MAC spoofing and MAC flooding are different problems.</h3>
+                            <p>A wireless BSSID can be copied as part of an impersonation or evil-twin scenario. MAC
+                                flooding targets a wired switch’s forwarding table with many fabricated source
+                                addresses. Merely observing access-point BSSIDs does not by itself enable or demonstrate
+                                a switch-table flooding attack.</p>
+                        </aside>
+
+                        <p>The channel list also showed many networks sharing the same spectrum. On 2.4 GHz, channels
+                            1, 6, and 11 are commonly used as non-overlapping 20 MHz choices. Multiple networks on the
+                            same channel contend for airtime; networks on partially overlapping channels can also
+                            interfere with one another.</p>
+
+                        <figure class="research-figure">
+                            <a href="images/03-channel-density.png"><img src="images/03-channel-density.png"
+                                    alt="WiFiInfoView channel column showing repeated use of channels 1 and 6"
+                                    width="186" height="560" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 03</span> Repeated channel use made local airtime contention visible.
+                            </figcaption>
+                        </figure>
+
+                        <p>Most observed networks advertised WPA2-PSK with CCMP, the AES-based protection used by WPA2.
+                            The survey also included an older WPA network and a WPA3-Personal network. Vendor and model
+                            fields can help an administrator inventory equipment and check relevant advisories, but
+                            they can also help an attacker narrow reconnaissance to a particular device family.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="wireless-settings">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Wireless settings in the router emulator</h2>
+                        <p>For the configuration portion, I opened the TRENDnet TEW-818DRU emulator. Its dashboard
+                            separated wireless, guest-network, parental-control, and status functions into a compact
+                            navigation panel.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/04-router-dashboard.png"><img src="images/04-router-dashboard.png"
+                                    alt="TRENDnet router emulator dashboard showing wireless and guest-network status"
+                                    width="936" height="544" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 04</span> The emulator’s main status page.</figcaption>
+                        </figure>
+
+                        <p>The wireless page allowed the SSID broadcast, channel selection, and channel width to be
+                            changed. Disabling SSID broadcast only hides the name from ordinary discovery lists; it
+                            should not be treated as an access-control feature.</p>
+
+                        <div class="interface-detail-grid">
+                            <figure class="research-figure">
+                                <a href="images/05-wireless-name-channel.png"><img
+                                        src="images/05-wireless-name-channel.png"
+                                        alt="Router controls for SSID, 802.11 mode, SSID broadcast, channel, and 20 MHz bandwidth"
+                                        width="674" height="344" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 05</span> Core 2.4 GHz wireless controls.</figcaption>
+                            </figure>
+                            <figure class="research-figure">
+                                <a href="images/06-channel-auto.png"><img src="images/06-channel-auto.png"
+                                        alt="Router frequency channel setting configured to Auto"
+                                        width="394" height="74" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 06</span> Automatic channel selection.</figcaption>
+                            </figure>
+                            <figure class="research-figure">
+                                <a href="images/07-channel-bandwidth.png"><img
+                                        src="images/07-channel-bandwidth.png"
+                                        alt="Router channel bandwidth setting configured to 20 MHz"
+                                        width="426" height="98" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 07</span> A 20 MHz channel width.</figcaption>
+                            </figure>
+                        </div>
+
+                        <p>Automatic channel selection can reduce manual work, although consumer routers vary in how
+                            often they reevaluate congestion. A wider 40 MHz channel can increase peak throughput, but
+                            it consumes more spectrum and can increase interference in a crowded 2.4 GHz environment.
+                            It does not inherently extend range; a narrower 20 MHz channel is often the more stable and
+                            considerate choice when many nearby networks are present.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="security">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Security policy and passphrase handling</h2>
+                        <p>The emulator was configured for WPA2-PSK with AES/CCMP. That is stronger than legacy WPA or
+                            TKIP-only operation. Mixed WPA/WPA2 or TKIP compatibility modes may permit older, weaker
+                            options and should be avoided unless a documented legacy requirement makes them necessary.
+                        </p>
+
+                        <div class="interface-detail-grid">
+                            <figure class="research-figure">
+                                <a href="images/08-wpa2-policy.png"><img src="images/08-wpa2-policy.png"
+                                        alt="Router security mode set to WPA2-PSK"
+                                        width="508" height="106" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 08</span> WPA2-Personal selected.</figcaption>
+                            </figure>
+                            <figure class="research-figure">
+                                <a href="images/09-wpa2-aes-config.png"><img
+                                        src="images/09-wpa2-aes-config.png"
+                                        alt="Router WPA configuration showing AES encryption, a masked passphrase, and key rotation interval"
+                                        width="936" height="288" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 09</span> AES encryption with the passphrase masked.</figcaption>
+                            </figure>
+                        </div>
+
+                        <p>A secure Wi-Fi passphrase should be long, random, unique, and changed from any vendor
+                            default. Adding symbols can expand the character set, but length and unpredictability matter
+                            more than satisfying a simple complexity pattern. “Salting” is not a separate option the
+                            router owner adds to the passphrase; WPA2’s key derivation already incorporates the SSID.
+                            The plaintext passphrase shown in one supplied capture is therefore excluded from this
+                            public note.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="guest-network">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Guest-network segmentation</h2>
+                        <p>A guest network can separate visitor devices from the private LAN, but the result depends on
+                            the options selected. In the emulator, <strong>Internet Access Only</strong> was checked,
+                            which is intended to prevent guests from accessing the private LAN. <strong>Wireless Client
+                                Isolation</strong> was not checked, so guest devices could potentially communicate with
+                            one another.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/10-guest-network.png"><img src="images/10-guest-network.png"
+                                    alt="TRENDnet guest-network page showing Internet Access Only enabled, client isolation disabled, and security mode disabled"
+                                    width="936" height="578" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 10</span> The guest-network controls combine LAN separation, client
+                                isolation, and their own security policy.</figcaption>
+                        </figure>
+
+                        <div class="interface-detail-grid">
+                            <figure class="research-figure">
+                                <a href="images/11-internet-only.png"><img src="images/11-internet-only.png"
+                                        alt="Internet Access Only checked to prevent guest access to the private LAN"
+                                        width="936" height="72" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 11</span> Private-LAN access blocked for guests.</figcaption>
+                            </figure>
+                            <figure class="research-figure">
+                                <a href="images/12-client-isolation.png"><img src="images/12-client-isolation.png"
+                                        alt="Wireless Client Isolation unchecked, allowing guest-to-guest communication"
+                                        width="716" height="100" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 12</span> Guest-to-guest isolation is not enabled.</figcaption>
+                            </figure>
+                            <figure class="research-figure">
+                                <a href="images/13-guest-security-disabled.png"><img
+                                        src="images/13-guest-security-disabled.png"
+                                        alt="Guest-network security mode set to Disable"
+                                        width="862" height="176" loading="lazy" decoding="async"></a>
+                                <figcaption><span>Fig. 13</span> Guest wireless security is disabled in this emulator
+                                    state.</figcaption>
+                            </figure>
+                        </div>
+
+                        <p>If the guest SSID were enabled, leaving its security mode disabled would create an open
+                            network. Ease of connection is not worth removing encryption; a separate WPA2 or WPA3 guest
+                            passphrase can preserve segmentation without exposing guest traffic as an open WLAN. A
+                            guest network is not automatically a honeynet—turning one into an observation environment
+                            would require deliberate isolation, authorization, monitoring, and careful data handling.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="access-control">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>LAN client filtering</h2>
+                        <p>The access-control page offered rules based on LAN IP ranges, protocol, destination-port
+                            ranges, schedules, and an enabled flag. This can restrict selected traffic from configured
+                            clients, but it is not a substitute for strong wireless authentication, guest isolation,
+                            firmware maintenance, or a properly designed firewall policy.</p>
+
+                        <figure class="research-figure research-figure-wide">
+                            <a href="images/14-lan-client-filter.png"><img src="images/14-lan-client-filter.png"
+                                    alt="Router LAN client filter with IP range, protocol, destination port, schedule, and enabled columns"
+                                    width="936" height="804" loading="lazy" decoding="async"></a>
+                            <figcaption><span>Fig. 14</span> The LAN client filter can express scheduled IP- and
+                                port-based rules.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="takeaway">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Takeaway</h2>
+                        <p>The survey showed how much operational information ordinary Wi-Fi management traffic makes
+                            visible without joining a network. The router emulator then showed the defensive side of
+                            those same observations: channel planning, modern encryption, unique passphrases, LAN
+                            separation, guest-to-guest isolation, and targeted filtering all influence the actual
+                            security posture.</p>
+                        <p>The interface was easy to navigate for someone familiar with networking, but it offered
+                            little guidance about why one option was safer than another. A clearer consumer interface
+                            would explain the security consequence of hiding an SSID, using legacy encryption,
+                            disabling guest authentication, or leaving client isolation off—not merely expose the
+                            controls.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Network Security notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

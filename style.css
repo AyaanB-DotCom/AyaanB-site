@@ -1074,6 +1074,30 @@ ul, ol { padding: 0; }
 .figure-pair .research-figure img { height: 24rem; }
 .terminal-figure { max-width: 31rem; }
 
+.interface-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin: 2.35rem 0 2.75rem;
+}
+.interface-detail-grid .research-figure {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  margin: 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.interface-detail-grid .research-figure img {
+  width: auto;
+  max-width: 100%;
+  max-height: 18rem;
+  margin: 0;
+  object-fit: contain;
+  object-position: left top;
+}
+
 .decision-path,
 .finding-register {
   max-width: 47rem;
@@ -1392,6 +1416,7 @@ ul, ol { padding: 0; }
   .case-study-nav { margin-bottom: 3.5rem; }
   .case-study-section { margin-bottom: 4.2rem; }
   .figure-pair { grid-template-columns: 1fr; }
+  .interface-detail-grid { grid-template-columns: 1fr; }
   .figure-pair .research-figure img { height: auto; max-height: 34rem; }
   .decision-path li,
   .finding-register > li { grid-template-columns: 1fr; gap: 0.45rem; }
