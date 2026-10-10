@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The public, redacted resume of AyaanB-DotCom, covering security assessment work, defensive operations, research projects, technical skills, and certifications.">
+  <meta name="author" content="AyaanB-DotCom">
+  <title>Resume / AyaanB-DotCom</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="resume-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../index.html"><span class="identity-name">AYAANB-DOTCOM</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../index.html">Index</a><a class="nav-item" href="../research/index.html">Research</a><a class="nav-item" href="../writing/index.html">Writing</a><a class="nav-item" href="index.html" aria-current="page">Resume</a><a class="nav-item" href="../about/index.html">About</a><a class="nav-item" href="../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../index.html">Index</a><a class="sidebar-link" href="../research/index.html">Research</a><a class="sidebar-link" href="../notes/index.html">Notes</a><a class="sidebar-link" href="../experiments/index.html">Experiments</a><a class="sidebar-link" href="../writing/index.html">Writing</a><a class="sidebar-link" href="index.html" aria-current="page">Resume</a><a class="sidebar-link" href="../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content resume-main" id="main">
+      <header class="page-header resume-header">
+        <div><p class="page-kicker">Resume / public edition / redacted</p><h1 class="page-title">Resume.</h1></div>
+        <p class="page-summary">Selected security assessment work, defensive operations, independent research, technical projects, and hands-on systems practice.</p>
+        <p class="resume-contact-note">Contact me for full unredacted resume</p>
+      </header>
+
+      <section class="resume-section" aria-labelledby="experience-heading">
+        <header class="resume-section-heading"><p>01 /</p><h2 id="experience-heading">Experience</h2></header>
+        <div class="resume-section-content">
+          <article class="resume-entry">
+            <header class="resume-entry-header"><div><h3>Freelance Penetration Tester</h3><p class="resume-organization">Confidential Client (NDA)</p></div><p class="resume-date">May 2026 – Present</p></header>
+            <ul>
+              <li>Identified and validated security vulnerabilities for a confidential client over a multi-month engagement, using manual and tool-assisted testing with Kali Linux, OWASP ZAP, and cURL.</li>
+              <li>Produced 10+ security assessments and individual vulnerability reports, communicating findings directly with the client through written reports, calls, and meetings to support remediation.</li>
+              <li>Performed repeated follow-up testing as fixes were implemented, validating remediation and identifying residual issues where applicable.</li>
+            </ul>
+          </article>
+
+          <article class="resume-entry">
+            <header class="resume-entry-header"><div><h3><span class="resume-redaction">[REDACTED]</span> Team Member</h3></div><p class="resume-date">September 2024 – Present</p></header>
+            <ul>
+              <li>Defended a live network as part of an 8-person blue team at <span class="resume-redaction">[REDACTED]</span> 2026 Regionals, enforcing configuration baselines with Ansible playbooks to reduce attack surface.</li>
+              <li>Blocked an active intrusion through a Teleport gateway using network analysis and threat hunting, preventing lateral movement while coordinating and documenting the response.</li>
+              <li>Solved digital forensics, binary analysis, and network reconnaissance challenges across 10+ CTF competitions, including <span class="resume-redaction">[REDACTED]</span>.</li>
+            </ul>
+          </article>
+
+          <article class="resume-entry">
+            <header class="resume-entry-header"><div><h3>Security Contributor</h3><p class="resume-organization"><span class="resume-redaction">[REDACTED]</span></p></div><p class="resume-date">April 2026 – May 2026</p></header>
+            <ul>
+              <li>Assessed a GPT-4-integrated platform against the OWASP Top 10 for LLM Applications, documenting security findings and remediation guidance for the development team.</li>
+              <li>Implemented input-sanitization controls with regex filters and custom parsing logic, collaborating with application owners to address injection-related security findings.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="resume-section" aria-labelledby="projects-heading">
+        <header class="resume-section-heading"><p>02 /</p><h2 id="projects-heading">Projects</h2></header>
+        <div class="resume-section-content">
+          <article class="resume-entry">
+            <header class="resume-entry-header"><div><h3><a href="../projects/android-tv-malware-analysis/index.html">Android TV Box Supply-Chain Malware Analysis</a></h3><p class="resume-project-links"><a href="../projects/android-tv-malware-analysis/index.html">Case study</a><a href="https://github.com/AyaanB-DotCom/android-tv-supply-chain-malware">GitHub repository</a></p></div></header>
+            <ul>
+              <li>Investigated an FBI-flagged MXQ Pro 4K Android TV box, gaining bootloader access over UART with a pogo-pin clamp and CP2102 USB-TTL adapter while maintaining an air-gapped analysis environment.</li>
+              <li>Extracted the full 1 GB system partition through chunked eMMC block reads and identified four malware families—BADBOX/appdown, Triada, Vo1d, and Peachpit/OpenRTB—hardcoded C2 infrastructure, and a root backdoor through static analysis.</li>
+              <li>Published the investigation on GitHub, where it received 33 stars and 5 forks and was featured in Hackaday’s <em>This Week in Security</em> in August 2026.</li>
+            </ul>
+          </article>
+
+          <article class="resume-entry">
+            <header class="resume-entry-header"><div><h3>Active Directory Attack Lab</h3></div></header>
+            <ul>
+              <li>Built a four-machine Windows domain consisting of Windows Server, two workstations, and a Kali attacker, then mapped its attack surface and configuration weaknesses before testing.</li>
+              <li>Compromised the domain via LLMNR/NBT-NS poisoning and NTLM relay, escalated to domain administrator, and dumped SAM hashes; documented mitigations including disabling LLMNR/NBT-NS, enforcing SMB signing, and restricting NTLM.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="resume-section" aria-labelledby="skills-heading">
+        <header class="resume-section-heading"><p>03 /</p><h2 id="skills-heading">Skills</h2></header>
+        <dl class="resume-skills">
+          <div><dt>Security Operations</dt><dd>Security Hardening, Access Control, Incident Response, Threat Hunting, Malware Analysis, Digital Forensics, Reverse Engineering, Firmware Analysis, MITRE ATT&amp;CK</dd></div>
+          <div><dt>Assessment &amp; Reporting</dt><dd>Penetration Testing, Vulnerability Assessment &amp; Remediation, Security Assessments, Technical Security Reporting, Remediation Validation, Client-Facing Risk Communication, LLM Application Security</dd></div>
+          <div><dt>Security &amp; Analysis Tools</dt><dd>Kali Linux, OWASP ZAP, cURL, Nmap, Ghidra, Binwalk, Hashcat</dd></div>
+          <div><dt>Monitoring &amp; Network Analysis</dt><dd>Splunk, Wireshark, Suricata, Osquery, Linux Log Investigation</dd></div>
+          <div><dt>Windows &amp; Active Directory</dt><dd>Active Directory, NTLM Relay, Responder, Impacket</dd></div>
+          <div><dt>Systems &amp; Scripting</dt><dd>Linux, Python, Bash, SQL, Ansible, VMware, UART/Serial Debugging</dd></div>
+        </dl>
+      </section>
+
+      <section class="resume-section" aria-labelledby="certifications-heading">
+        <header class="resume-section-heading"><p>04 /</p><h2 id="certifications-heading">Certifications</h2></header>
+        <ul class="resume-certifications">
+          <li>CompTIA Security+</li>
+          <li>Google Cybersecurity Certificate</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p></div></footer>
+  <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An editorial case study of a passive Pwnagotchi lab configured to study Wi-Fi protocol behavior without deauthentication, association, packet injection, or password cracking.">
+  <meta name="author" content="AyaanB-DotCom">
+  <title>Passive Pwnagotchi Lab / AyaanB-DotCom</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../../index.html"><span class="identity-name">AYAANB-DOTCOM</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../../index.html">Index</a><a class="nav-item is-section" href="../../research/index.html">Research</a><a class="nav-item" href="../../writing/index.html">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a class="nav-item" href="../../about/index.html">About</a><a class="nav-item" href="../../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../../index.html">Index</a><a class="sidebar-link is-section" href="../../research/index.html">Research</a><a class="sidebar-link" href="../../notes/index.html">Notes</a><a class="sidebar-link" href="../../experiments/index.html">Experiments</a><a class="sidebar-link" href="../../writing/index.html">Writing</a><a class="sidebar-link" href="../../resume/index.html">Resume</a><a class="sidebar-link" href="../../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content research-article" id="main">
+      <header class="article-header article-header-wide">
+        <nav class="document-id" aria-label="Breadcrumb"><a href="../../research/index.html">Research</a> / Wireless Security / <a href="index.html" aria-current="page">003</a></nav>
+        <p class="article-label">Editorial research case study</p>
+        <h1 class="article-title">Building a Passive Pwnagotchi Lab</h1>
+        <p class="case-study-deck">A Raspberry Pi Zero W configured to make Wi-Fi protocol behavior observable without deauthentication, association, packet injection, credential access, or password cracking.</p>
+        <p class="reading-note">Case study · Approximately 4 minutes</p>
+      </header>
+
+      <dl class="research-brief">
+        <div><dt>Platform</dt><dd>Raspberry Pi Zero W and Pwnagotchi</dd></div>
+        <div><dt>Subject</dt><dd>802.11 discovery traffic and WPA2 handshakes</dd></div>
+        <div><dt>Method</dt><dd>Passive monitoring and Wireshark analysis</dd></div>
+        <div><dt>Boundary</dt><dd>No injection, interference, connection, or cracking</dd></div>
+      </dl>
+
+      <aside class="editorial-aside" aria-label="Ethical scope">
+        <p class="section-kicker">Ethical boundary</p>
+        <h3>Listening was the whole experiment.</h3>
+        <p>Deauthentication and association were disabled. The device did not inject packets, connect to networks, interfere with clients, or attempt to recover credentials. The project was built to observe protocol behavior, not to create traffic or gain access.</p>
+      </aside>
+
+      <nav class="case-study-nav" aria-label="Case study sections">
+        <ol>
+          <li><a href="#premise">Premise</a></li>
+          <li><a href="#investigation">Investigation</a></li>
+          <li><a href="#building-the-listener">The listener</a></li>
+          <li><a href="#passive-model">Passive model</a></li>
+          <li><a href="#observations">What becomes visible</a></li>
+          <li><a href="#reflections">Reflections</a></li>
+          <li><a href="#technical-documentation">Full documentation</a></li>
+        </ol>
+      </nav>
+
+      <article class="case-study-body">
+        <section class="case-study-section" id="premise">
+          <p class="section-kicker">01 / Introduction</p>
+          <h2>The premise</h2>
+          <p class="section-lede">Pwnagotchi is usually introduced as a playful wireless-security device. I was interested in a narrower question: how much could I learn about Wi-Fi behavior if the device never caused another system to do anything?</p>
+          <p>The answer shaped the project. Instead of treating handshake collection as a route toward passwords, I treated the Raspberry Pi as a small protocol observatory. It could listen to information already moving through the air, preserve examples for inspection, and give me a concrete way to connect wireless-security concepts with actual frame sequences.</p>
+          <p>The repository’s <a href="https://github.com/AyaanB-DotCom/Pwnagotchi#project-overview">project overview</a> records that scope plainly: this is an educational, passive lab for understanding Wi-Fi communication and WPA2 handshakes without violating privacy or crossing into unauthorized access.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <img src="https://github.com/user-attachments/assets/e0ebd92b-5112-49b7-8450-219b2db180c0" alt="Screenshot from the passive Pwnagotchi lab interface" width="1249" height="612" decoding="async">
+            <figcaption><span>Fig. 01</span> The project’s own interface capture from the passive Pwnagotchi setup documented in the repository.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="investigation">
+          <p class="section-kicker">02 / Question</p>
+          <h2>Studying the protocol without provoking it</h2>
+          <p>Wireless networks continuously coordinate in public radio space. Access points announce their presence. Clients look for networks. Authentication begins through a recognizable exchange of frames. Those mechanics are visible before any application data enters the picture, and they are enough to make the protocol feel less abstract.</p>
+          <p>The challenge was not maximizing collection. It was keeping the method aligned with the question. If the device sent deauthentication frames to force reconnection, attempted association, or injected packets, the lab would no longer be observing naturally occurring traffic. It would be creating the condition it claimed to study.</p>
+          <p>That made restraint part of the methodology. The project’s <a href="https://github.com/AyaanB-DotCom/Pwnagotchi#ethical-scope">ethical scope</a> is not a disclaimer added after the technical work; it is the design requirement that determines which features are allowed to run.</p>
+        </section>
+
+        <section class="case-study-section" id="building-the-listener">
+          <p class="section-kicker">03 / Hardware and tools</p>
+          <h2>Building the listener</h2>
+          <p>The hardware was intentionally small: a Raspberry Pi Zero W running the community-maintained <a href="https://github.com/jayofelony/pwnagotchi">Pwnagotchi software</a>. Wireshark provided the analysis surface, while macOS Terminal handled the ordinary configuration and file-management work around the device.</p>
+          <p>Each component had one job. The Pi supplied a portable Wi-Fi radio and Linux environment. Pwnagotchi organized monitor-mode capture. Wireshark turned the resulting packet data into a sequence that could be filtered and read. Nothing in the setup required a cloud cracking service or a workflow for testing recovered keys, because credential recovery was outside the project.</p>
+          <p>The complete, compact bill of materials is preserved in the repository’s <a href="https://github.com/AyaanB-DotCom/Pwnagotchi#tools-used">tools section</a>.</p>
+        </section>
+
+        <section class="case-study-section" id="passive-model">
+          <p class="section-kicker">04 / Configuration</p>
+          <h2>Defining a passive operating model</h2>
+          <p>A default tool can expose capabilities that are irrelevant—or inappropriate—for a particular investigation. The useful step here was not adding a feature. It was reducing the configuration until the device’s behavior matched the stated scope.</p>
+
+          <ol class="decision-path">
+            <li><strong>Receive only</strong><span>Monitor radio traffic already being broadcast instead of transmitting frames to influence nearby devices.</span></li>
+            <li><strong>No deauth</strong><span>Do not disconnect clients or force them to begin a new authentication exchange.</span></li>
+            <li><strong>No association</strong><span>Do not connect to, authenticate with, or request service from networks being observed.</span></li>
+            <li><strong>No cracking</strong><span>Keep captured protocol examples for study without attempting to derive or validate passwords.</span></li>
+          </ol>
+
+          <p>This boundary also makes the results easier to interpret. A frame sequence collected without intervention reflects traffic that occurred independently of the lab. The device becomes a witness to protocol behavior rather than an active participant in it.</p>
+        </section>
+
+        <section class="case-study-section" id="observations">
+          <p class="section-kicker">05 / Protocol view</p>
+          <h2>What becomes visible</h2>
+          <p class="section-lede">The project did not need to expose private payloads or recover a password to make wireless security concrete. Its value came from recognizing the roles different frames play before ordinary network traffic begins.</p>
+
+          <ol class="finding-register">
+            <li><div><h3>Beacons announce the network</h3><p>Access points periodically broadcast identifying and capability information so nearby devices can discover them. Reading those fields shows how a network describes itself at the radio layer.</p></div></li>
+            <li><div><h3>Probes show discovery behavior</h3><p>Probe traffic illustrates how clients and access points participate in finding one another. It is also a reminder that wireless metadata can reveal behavior even when no application content is inspected.</p></div></li>
+            <li><div><h3>EAPOL frames reveal authentication structure</h3><p>The WPA2 key exchange appears as an ordered sequence that can be examined in Wireshark. In this lab, recognizing that sequence was the endpoint; the captured material was not used to test credentials.</p></div></li>
+          </ol>
+        </section>
+
+        <section class="case-study-section" id="reflections">
+          <p class="section-kicker">06 / Reflections</p>
+          <h2>The boundary was the most important configuration</h2>
+          <p>This project reinforced that security tooling does not define the research question on its own. A tool may support active operations, but that does not make those operations necessary. Removing capabilities can produce a cleaner experiment by reducing both ethical risk and methodological noise.</p>
+          <p>The repository cites New York Penal Law §§156.05 and 250.05 as part of its <a href="https://github.com/AyaanB-DotCom/Pwnagotchi#legal-context">legal context</a>. Those provisions address <a href="https://www.nysenate.gov/legislation/laws/PEN/156.05">unauthorized computer use</a> and <a href="https://www.nysenate.gov/legislation/laws/PEN/250.05">eavesdropping</a>. This page does not turn that review into a general legal conclusion: rules and facts vary by jurisdiction, and the case study is a description of a constrained lab configuration, not legal advice.</p>
+          <p>The durable lesson is technical as much as ethical. Beacons, probes, and authentication exchanges already contain enough structure to teach radio behavior, discovery, and key-establishment flow. The most interesting part of the setup was learning to read that structure without asking the device to go any further.</p>
+        </section>
+
+        <section class="case-study-section full-documentation" id="technical-documentation">
+          <p class="section-kicker">07 / Source record</p>
+          <h2>Full project documentation</h2>
+          <p>This case study is the editorial account. The GitHub repository preserves the original project overview, authentic interface image, passive-use rules, cited legal context, upstream Pwnagotchi reference, and hardware and analysis-tool list.</p>
+          <a class="github-cta" href="https://github.com/AyaanB-DotCom/Pwnagotchi">Read the complete project documentation on GitHub <span aria-hidden="true">→</span></a>
+          <p class="documentation-links"><a href="https://github.com/AyaanB-DotCom/Pwnagotchi#project-overview">Project overview</a><a href="https://github.com/AyaanB-DotCom/Pwnagotchi#ethical-scope">Ethical scope</a><a href="https://github.com/AyaanB-DotCom/Pwnagotchi#tools-used">Tools used</a></p>
+        </section>
+      </article>
+
+      <a class="back-link" href="../../research/index.html">← Return to Research archive</a>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p></div></footer>
+  <script src="../../script.js"></script>
+</body>
+</html>

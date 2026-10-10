@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="A group case study analyzing deleted Windows project files, Recycle Bin artifacts, MFT records, recovery, attribution, and investigative limitations.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>The Deleted Project Files / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="forensics-navigation">
+                    <h2 class="sidebar-heading" id="forensics-navigation">Digital Forensics</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../case-study-1/index.html">Case Study 1</a></li>
+                        <li><a href="index.html" aria-current="page">Case Study 2</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Digital Forensics</a> / <span aria-current="page">002</span></nav>
+                <p class="article-label">Group case study / forensic findings</p>
+                <h1 class="article-title">The Deleted Project Files</h1>
+                <p class="article-deck">A forensic analysis of recovered Windows deletion artifacts—and the line
+                    between proving that files were deleted and proving who deleted them.</p>
+            </header>
+
+            <dl class="memo-routing" aria-label="Memorandum details">
+                <div><dt>To</dt><dd>Management</dd></div>
+                <div><dt>From</dt><dd>&lt;REDACTED&gt;</dd></div>
+                <div><dt>Date</dt><dd><time datetime="2026-09-17">September 17, 2026</time></dd></div>
+                <div><dt>Subject</dt><dd>Forensic Findings &amp; Analysis — Case Study 2</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Authorship and privacy note">
+                <strong>Publication note.</strong> This memorandum was completed as a group assignment. Contributor
+                names are not mentioned for privacy, and the original author redaction is preserved.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="executive-summary">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Executive Summary</h2>
+                        <p>This document presents findings concerning project files that disappeared from a shared
+                            workstation. A forensic image of the workstation was examined to determine what happened to
+                            the files and whether the available artifacts supported a conclusion that they had been
+                            stolen.</p>
+                        <p>The examination recovered evidence of deletion from the Windows Recycle Bin and Master File
+                            Table. Those artifacts establish that project files were deleted and support a timeline,
+                            but the available evidence does not establish who physically performed the deletion or
+                            whether it was intentional. Security Event Logs and Registry data that could have provided
+                            corroborating context were not available in the case image.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="findings-worksheet">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Forensic Findings Worksheet</h2>
+                        <p>The worksheet separates artifacts observed in the forensic image from sources that would
+                            have been useful but were unavailable. Timestamps are reproduced in UTC as recorded in the
+                            assignment.</p>
+
+                        <div class="memo-table-wrap" role="region" aria-label="Forensic artifacts" tabindex="0">
+                            <table class="memo-table">
+                                <caption>Artifacts examined or sought</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Artifact</th>
+                                        <th scope="col">Location</th>
+                                        <th scope="col">Timestamp</th>
+                                        <th scope="col">Status and significance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row"><code>$I</code> / <code>$R</code> files</th>
+                                        <td><code>C:\$Recycle.Bin\[User SID]\</code></td>
+                                        <td><time datetime="2026-09-12T19:00:00Z">2026-09-12<br>19:00:00 UTC</time>
+                                        </td>
+                                        <td><span class="artifact-status is-observed">Observed</span> The
+                                            <code>$I</code> metadata records the original path, size, and deletion
+                                            time; its paired <code>$R</code> file contains the deleted content.</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">MFT entry</th>
+                                        <td><code>$MFT</code></td>
+                                        <td><time datetime="2026-09-12T19:07:43Z">2026-09-12<br>19:07:43 UTC</time>
+                                        </td>
+                                        <td><span class="artifact-status is-observed">Observed</span> The entry
+                                            contributes file-system metadata, including time values, size, allocation
+                                            status, and location. It does not identify the human actor.</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Windows Security Event Logs</th>
+                                        <td><code>C:\Windows\System32\winevt\Logs\Security.evtx</code></td>
+                                        <td><time datetime="2026-09-11T19:10:00Z">2026-09-11<br>19:10:00 UTC</time>
+                                        </td>
+                                        <td><span class="artifact-status is-missing">Not available</span> Relevant
+                                            logon events could have helped establish which account session was active,
+                                            but would not by themselves identify the person at the keyboard.</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Registry data</th>
+                                        <td><code>C:\Windows\System32\config</code></td>
+                                        <td><time datetime="2026-09-11T18:30:00Z">2026-09-11<br>18:30–19:20 UTC</time>
+                                        </td>
+                                        <td><span class="artifact-status is-missing">Not available</span> Relevant
+                                            Registry artifacts might have contributed file-use and user-context clues
+                                            to the activity timeline.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="memo-subheading">Interpretations and alternatives</h3>
+                        <div class="memo-table-wrap" role="region" aria-label="Interpretations and alternatives"
+                            tabindex="0">
+                            <table class="memo-table interpretation-table">
+                                <caption>Assessment of possible interpretations</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Interpretation</th>
+                                        <th scope="col">Alternative explanation</th>
+                                        <th scope="col">Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>The project files were sent to the Recycle Bin.</td>
+                                        <td>The recovered files may have been older project files rather than the files
+                                            considered critical to the company.</td>
+                                        <td><span class="confidence-level is-high">High</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>If the employee was the only person at the workstation, that would support
+                                            the employee having performed the deletion.</td>
+                                        <td>Another person could have used the workstation or the employee’s account.
+                                        </td>
+                                        <td><span class="confidence-level">Medium</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>A concurrent account logon would connect the deletion window to that
+                                            account session.</td>
+                                        <td>Someone else may have known or used the account credentials.</td>
+                                        <td><span class="confidence-level">Medium</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>The deletion occurred within the suspected user’s account context.</td>
+                                        <td>Account context does not establish the identity or intent of the person who
+                                            initiated the action.</td>
+                                        <td><span class="confidence-level">Medium</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="technical-analysis">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Technical Analysis &amp; Investigation Questions</h2>
+                        <dl class="analysis-points">
+                            <div>
+                                <dt>Evidence of deletion</dt>
+                                <dd>When a file is sent to the Windows Recycle Bin, Windows stores the renamed file
+                                    content in a <code>$R</code> file and creates a paired <code>$I</code> metadata
+                                    file containing information such as its original path, size, and deletion time.
+                                    These artifacts support the conclusion that the files were deleted through the
+                                    Recycle Bin. <span class="citation">(IT-Connect, 2026)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Data persistence</dt>
+                                <dd>Deletion does not necessarily erase file content immediately. File-system records
+                                    can mark space as available for reuse while data remains recoverable until it is
+                                    overwritten. Recoverability depends on the storage medium and system behavior; for
+                                    example, SSD TRIM can reduce or eliminate the recovery window. <span
+                                        class="citation">(GeeksforGeeks, 2026)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Unallocated space</dt>
+                                <dd>Unallocated space is storage that the file system considers available. Deleted
+                                    content may remain there until reuse, allowing forensic tools such as Autopsy to
+                                    locate or carve recoverable data. <span class="citation">(Pen Test Partners,
+                                        2025)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Slack space</dt>
+                                <dd>File slack is the unused portion of a file’s final allocated cluster and can retain
+                                    residual data. It is distinct from MFT record slack, though both can contain useful
+                                    remnants. In this case, five files were recoverable because the relevant data had
+                                    not been overwritten. <span class="citation">(TechTarget, n.d.)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Value of metadata</dt>
+                                <dd>Metadata can contribute time values, file location, size, and allocation status,
+                                    helping reconstruct the original location and timeline. Copies used in the
+                                    investigation should preserve these details. <span class="citation">(Sygnia,
+                                        2025)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Recovery versus attribution</dt>
+                                <dd>Recovery requires locating data that remains on disk. Attribution requires
+                                    additional evidence linking an action to a specific person. Here, the artifacts
+                                    show which files were deleted and associate them with an account context, but they
+                                    do not establish who clicked delete. <span class="citation">(Nelson et al.,
+                                        2019)</span></dd>
+                            </div>
+                            <div>
+                                <dt>Additional artifacts</dt>
+                                <dd>Useful corroborating sources could include Windows Event and Security Logs,
+                                    Registry artifacts, browser and command history, cloud-storage audit logs, the USN
+                                    Journal, LNK files, and relevant physical-access records.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="limitations">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Limitations</h2>
+                        <p>The absence of Security Event Logs and Registry data left gaps in determining which account
+                            session was active and what activity surrounded the deletion. The analysis therefore
+                            focused on the Recycle Bin and MFT artifacts available in a single forensic image. Activity
+                            originating from a different device or location would not be visible in that image.</p>
+                        <p>The recovered files represent data that remained available; the investigation cannot measure
+                            what had already been overwritten or otherwise made unrecoverable. Most importantly,
+                            recovery verifies the prior existence and deletion of data, not the identity or intent of
+                            the person responsible. <span class="citation">(Kent et al., 2006)</span></p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="investigation-challenge">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Investigation Challenge</h2>
+                        <p>If five deleted project files are recovered, can the evidence establish that the suspected
+                            employee deleted them intentionally? The answer is no. The artifacts support that deletion
+                            occurred within a particular account context, but alternative explanations remain.</p>
+                        <p>Another person could have used the suspected employee’s credentials or accessed the shared
+                            workstation while that account was active. Digital evidence from the available image
+                            cannot resolve that possibility without corroboration such as physical-access records or
+                            security footage.</p>
+                        <p>Malware could also have acted through the account. Evaluating that possibility would require
+                            additional workstation evidence, including relevant memory, process, persistence, and log
+                            artifacts. Establishing intent would require corroborating evidence connecting the
+                            employee’s actions to the deletion and showing circumstances consistent with a deliberate
+                            act.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="conclusion">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Conclusion</h2>
+                        <p>The defensible conclusion is that the project files were deleted and that the recovered
+                            artifacts associate the deletion with the suspected worker’s account context. The evidence
+                            does not establish that the worker personally performed the deletion, that files were
+                            exfiltrated, or that the deletion was intentional.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="references">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>References</h2>
+                        <ol>
+                            <li>GeeksforGeeks. (2026, July 2). <a
+                                    href="https://www.geeksforgeeks.org/recovering-deleted-digital-evidence/"><cite>Recovering
+                                        deleted digital evidence</cite></a>.</li>
+                            <li>IT-Connect. (2026, September 4). <a
+                                    href="https://www.it-connect.tech/windows-forensics-part-9-what-the-recycle-bin-can-reveal/"><cite>Windows
+                                        Recycle Bin forensics: <code>$I</code> and <code>$R</code> files
+                                        explained</cite></a>.</li>
+                            <li>Kent, K., Chevalier, S., Grance, T., &amp; Dang, H. (2006). <a
+                                    href="https://csrc.nist.gov/pubs/sp/800/86/final"><cite>Guide to integrating
+                                        forensic techniques into incident response</cite></a> (NIST Special
+                                Publication 800-86). National Institute of Standards and Technology.</li>
+                            <li>Nelson, B., Phillips, A., &amp; Steuart, C. (2019). <cite>Guide to computer forensics
+                                        and investigations</cite> (6th ed.). Cengage Learning.</li>
+                            <li>Pen Test Partners. (2025, April 23). <a
+                                    href="https://www.pentestpartners.com/security-blog/unallocated-space-analysis/"><cite>Unallocated
+                                        space analysis</cite></a>.</li>
+                            <li>Sygnia. (2025, March 30). <a
+                                    href="https://www.sygnia.co/blog/the-forensic-value-of-mft-slack-space/"><cite>The
+                                        forensic value of MFT slack space in modern Windows systems</cite></a>.</li>
+                            <li>TechTarget. (n.d.). <a
+                                    href="https://www.techtarget.com/whatis/definition/slack-space-file-slack-space"><cite>What
+                                        is slack space (file slack space)?</cite></a></li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Digital Forensics notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
