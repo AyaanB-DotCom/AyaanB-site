@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on performing passive reconnaissance: Google hacking, WHOIS, theHarvester, and Maltego.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Performing Passive Reconnaissance / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="ctd-navigation">
+                    <h2 class="sidebar-heading" id="ctd-navigation">Cyber Threats and Detections</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="index.html" aria-current="page">Passive Reconnaissance</a></li>
+                        <li><a href="../active-reconnaissance/index.html">Active Reconnaissance</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Cyber Threats and Detections</a> / <span
+                        aria-current="page">001</span></nav>
+                <p class="article-label">Educational lab · Ethical Hacking · Lab 01</p>
+                <h1 class="article-title">Performing Passive Reconnaissance (4e)</h1>
+                <p class="article-deck">Hands-on passive OSINT: Google search operators, WHOIS and DNS queries,
+                    theHarvester, and Maltego—then a short challenge recon write-up.</p>
+                <p class="reading-note">Lab report archive · October 4, 2026 · ~36 minutes on task</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized ethical-hacking coursework (Ethical Hacking, Fourth
+                Edition — Lab 01). Chosen-organization identifiers from the challenge section are omitted.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="google">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Section 1 · Google Hacking Techniques</h2>
+                        <p>I started with Google search operators to see how each one shapes what you get back. Using
+                            <code>site:</code> limited results to a single domain (for example the New York Times). Using
+                            <code>inurl:</code> pulled pages whose URLs contained a chosen string instead. The operators
+                            each returned more specific result sets than a plain keyword search.</p>
+                        <p>The differences I noticed in the search results were that they gave specific responses for
+                            each result. One scenario in which this can be useful is when I need to find info about a
+                            site, I can use the info dork.</p>
+                        <p>I also looked for results that could help someone target an organization. One result found
+                            was articles about PHP errors in AWS. This might be used by hackers to create/search for
+                            future exploits, as they know that there was once a PHP vulnerability.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="whois">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Section 1 · WHOIS and DNS</h2>
+                        <p>Next I ran a WHOIS lookup on a chosen domain and recorded registration details from the
+                            public record. The most recent update to the domain record was
+                            <strong>December 8, 2025</strong>.</p>
+                        <p>I then used <code>nslookup</code> to query mail (MX) and name-server (NS) records. The MX
+                            query returned registrar mail-forwarding hosts; the NS query returned the domain’s
+                            authoritative name servers. That confirmed how the domain’s email and DNS were wired without
+                            contacting the target’s own servers beyond normal public DNS.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="harvester-maltego">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Section 2 · theHarvester and Maltego</h2>
+                        <p>For applied learning I ran <strong>theHarvester</strong> against the lab target domain using
+                            Bing and DuckDuckGo as backends. Both runs finished without returning IPs, emails, or hosts
+                            in the captured output—useful as a negative result: the tool path worked, but those sources
+                            had nothing indexed for that target at the time.</p>
+                        <p>I also used <strong>Maltego</strong> to build a graph of name-server relationships and to
+                            list IP addresses, DNS names, and MX records for a demonstration domain. The graph view made
+                            the NS links obvious; the list view was better for scanning the set of discovered entities.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="challenge">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Section 3 · Challenge and Analysis</h2>
+                        <p>The challenge asked for organization details gathered through passive recon (name, domain,
+                            public presence, and related notes). Specific identifiers from that write-up are omitted
+                            here.</p>
+                        <p>One scenario in which this information can be used in further ethical hacking endeavors is
+                            being able to find the email registered to the domain. An ethical hacker can then run OSINT
+                            tools against that email to find more information.</p>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Cyber Threats and Detections</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>

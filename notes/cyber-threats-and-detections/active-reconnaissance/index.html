@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Educational lab notes on performing active reconnaissance with Zenmap, Wireshark, Nessus, and OpenVAS.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>Performing Active Reconnaissance / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="ctd-navigation">
+                    <h2 class="sidebar-heading" id="ctd-navigation">Cyber Threats and Detections</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../passive-reconnaissance/index.html">Passive Reconnaissance</a></li>
+                        <li><a href="index.html" aria-current="page">Active Reconnaissance</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Cyber Threats and Detections</a> / <span
+                        aria-current="page">002</span></nav>
+                <p class="article-label">Educational lab · Ethical Hacking · Lab 02</p>
+                <h1 class="article-title">Performing Active Reconnaissance (4e)</h1>
+                <p class="article-deck">Zenmap host discovery and topology, Wireshark views of SYN vs TCP Connect
+                    scans, Nessus and OpenVAS vulnerability findings, plus challenge UDP and custom-profile scans on the
+                    lab network.</p>
+                <p class="reading-note">Lab report archive · October 7–8, 2026</p>
+            </header>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Lab context">
+                <strong>Educational lab.</strong> Authorized ethical-hacking coursework (Ethical Hacking, Fourth
+                Edition — Lab 02) against isolated lab subnets <code>172.30.0.0/24</code> and
+                <code>172.31.0.0/24</code>. Not a scan of production or third-party networks.
+            </aside>
+
+            <article class="memo-document">
+                <section class="memo-section" id="zenmap">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Section 1 · Zenmap Host Discovery</h2>
+                        <p>I started in Zenmap with a Ping scan across both lab subnets
+                            (<code>nmap -sn 172.30.0.0/24 172.31.0.0/24</code>). Nmap reported 11 hosts up out of 512
+                            addresses scanned.</p>
+
+                        <figure class="research-figure">
+                            <img src="01-zenmap-ping-scan.png"
+                                alt="Zenmap Ping scan listing 11 hosts up on 172.30 and 172.31 subnets"
+                                width="1400" height="900" decoding="async">
+                            <figcaption><span>Fig. 01</span> Ping scan hosts on the lab ranges.</figcaption>
+                        </figure>
+
+                        <p>A Quick scan plus against selected hosts filled in services and OS guesses. Host details for
+                            <code>172.30.0.20</code> showed the host up with open ports and a Windows-family OS match
+                            at high accuracy.</p>
+
+                        <figure class="research-figure">
+                            <img src="02-host-details-quick-scan.png"
+                                alt="Zenmap Host Details for 172.30.0.20 after Quick scan plus"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 02</span> Host details for <code>172.30.0.20</code>.</figcaption>
+                        </figure>
+
+                        <p>Documented addresses and operating systems from that pass:</p>
+                        <ul>
+                            <li><code>172.30.0.20</code> — MS Windows 7 / Server 2008 SP1 and R2 / Windows 8 or 8.1
+                            </li>
+                            <li><code>172.30.0.30</code> — MS Windows Server 2012 R2 Update 1</li>
+                            <li><code>172.30.0.40</code> — MS Windows Server 2016 build 10586–14393</li>
+                        </ul>
+
+                        <p>An Intense scan topology view showed how those hosts clustered relative to the scanner; a
+                            later SYN-style profile scan produced a similar topology for the six focused targets.</p>
+
+                        <figure class="research-figure">
+                            <img src="03-topology-intense.png"
+                                alt="Zenmap Topology tab after Intense scan of lab hosts"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 03</span> Network topology after Intense scan.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="04-topology-syn-profile.png"
+                                alt="Zenmap Topology with custom SYN scan profile selected"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 04</span> Topology with the custom SYN scan profile.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="wireshark-syn">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Section 1 · Wireshark and the SYN Scan</h2>
+                        <p>With a new Zenmap profile selected (command line visible in the UI), I captured traffic in
+                            Wireshark for a SYN scan of <code>172.30.0.20</code> port 22. Filtering to that host and
+                            port showed the half-open sequence: SYN from the scanner, SYN-ACK from the target, then RST
+                            from the scanner instead of completing the handshake.</p>
+
+                        <figure class="research-figure">
+                            <img src="05-wireshark-syn-scan.png"
+                                alt="Wireshark showing SYN, SYN-ACK, RST sequence to 172.30.0.20 port 22"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 05</span> Three-packet SYN scan sequence on port 22.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="nessus">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Section 1 · Nessus Vulnerability Scan</h2>
+                        <p>In Nessus I created a new policy named <code>k3rberoast_Policy</code> from the Basic Network
+                            Scan template, then reviewed a high finding: MS17-010 (plugin 97833)—the SMBv1 remote code
+                            execution family tied to EternalBlue / WannaCry-class issues, with patch and SMBv1-disable
+                            guidance in the plugin text.</p>
+
+                        <figure class="research-figure">
+                            <img src="06-nessus-policy.png"
+                                alt="Nessus Policies page showing k3rberoast_Policy Basic Network Scan"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 06</span> New Nessus policy.</figcaption>
+                        </figure>
+
+                        <figure class="research-figure">
+                            <img src="07-nessus-ms17-010.png"
+                                alt="Nessus plugin details for MS17-010 SMB vulnerability"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 07</span> MS17-010 title and plugin information.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="nmap-applied">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>Section 2 · Nmap on Kali</h2>
+                        <p>On AttackLinux01 I ran a TCP ACK scan against <code>172.30.0.20</code>
+                            (<code>(nmap -n -Pn -sA -F -T5)</code>. All 100 scanned ports came back filtered
+                            (no-response)—consistent with a firewall dropping the probes rather than clear open/closed
+                            answers.</p>
+
+                        <figure class="research-figure">
+                            <img src="08-nmap-ack-scan.png"
+                                alt="Kali terminal ACK scan of 172.30.0.20 showing filtered ports"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 08</span> ACK scan results on <code>172.30.0.20</code>.</figcaption>
+                        </figure>
+
+                        <p>I also ran an NSE <code>ssh-hostkey</code> script against <code>172.31.0.60</code> on port
+                            22. Port 22 was open and the script returned DSA and RSA host-key fingerprints (VMware MAC
+                            on the host).</p>
+
+                        <figure class="research-figure">
+                            <img src="09-nmap-ssh-hostkey.png"
+                                alt="Nmap ssh-hostkey script output for 172.31.0.60 port 22"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 09</span> <code>ssh-hostkey</code> script results.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="tcp-connect">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Section 2 · TCP Connect in Wireshark</h2>
+                        <p>For a TCP Connect scan of <code>172.30.0.20</code> port 22, Wireshark showed a four-packet
+                            sequence: SYN, SYN-ACK, ACK (handshake completes), then RST-ACK to tear the connection
+                            down—different from the three-packet SYN stealth pattern earlier.</p>
+
+                        <figure class="research-figure">
+                            <img src="10-wireshark-tcp-connect.png"
+                                alt="Wireshark four-packet TCP Connect sequence on port 22"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 10</span> Four-packet TCP Connect sequence on port 22.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="openvas">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Section 2 · OpenVAS Finding</h2>
+                        <p>In Greenbone / OpenVAS I opened the details for a high MySQL / MariaDB weak-password finding
+                            on <code>172.31.0.40:3306</code>. Detection reported login as root with password
+                            <code>password</code>, product CPE for MySQL 5.7.34, and the usual remediation path of
+                            hardening credentials.</p>
+
+                        <figure class="research-figure">
+                            <img src="11-openvas-mysql.png"
+                                alt="OpenVAS report detail for MySQL MariaDB weak password finding"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 11</span> MySQL / MariaDB weak-password details.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="challenge">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Section 3 · Challenge</h2>
+                        <p>For the UDP challenge I scanned port 53 on <code>172.30.0.1</code>
+                            (<code>(nmap -sU -p 53)</code>. The port reported open as <code>domain</code>.</p>
+
+                        <figure class="research-figure">
+                            <img src="12-zenmap-udp-53.png"
+                                alt="Zenmap UDP scan of port 53 on 172.30.0.1 showing open domain"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 12</span> UDP scan of port 53 on <code>172.30.0.1</code>.</figcaption>
+                        </figure>
+
+                        <p>I also created a new Zenmap profile and used it to scan <code>172.31.0.60</code> on ports
+                            22, 80, and 443. Results: 22/tcp open (ssh), 80/tcp open (http), 443/tcp closed.</p>
+
+                        <figure class="research-figure">
+                            <img src="13-zenmap-custom-profile.png"
+                                alt="Zenmap custom profile scan of 172.31.0.60 ports 22 80 443"
+                                width="1400" height="900" loading="lazy" decoding="async">
+                            <figcaption><span>Fig. 13</span> Custom profile scan of
+                                <code>172.31.0.60</code>.</figcaption>
+                        </figure>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Cyber Threats and Detections</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
