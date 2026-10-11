@@ -75,11 +75,7 @@ ul, ol { padding: 0; }
 }
 
 .primary-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem 1.35rem;
-  font: 13px/1.4 var(--sans);
+  display: none;
 }
 
 .nav-item {
