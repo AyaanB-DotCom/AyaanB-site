@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A forensic investigation of a cheap MP3 player that began as a Rockbox reverse-engineering project and recovered nearly four hours of audio the interface could not show.">
+  <meta name="author" content="AyaanB-DotCom">
+  <title>White Buffalo Roam / AyaanB-DotCom</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../../index.html"><span class="identity-name">AYAANB-DOTCOM</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../../index.html">Index</a><a class="nav-item is-section" href="../../research/index.html">Research</a><a class="nav-item" href="../../writing/index.html">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a class="nav-item" href="../../about/index.html">About</a><a class="nav-item" href="../../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../../index.html">Index</a><a class="sidebar-link is-section" href="../../research/index.html">Research</a><a class="sidebar-link" href="../../notes/index.html">Notes</a><a class="sidebar-link" href="../../experiments/index.html">Experiments</a><a class="sidebar-link" href="../../writing/index.html">Writing</a><a class="sidebar-link" href="../../resume/index.html">Resume</a><a class="sidebar-link" href="../../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content research-article" id="main">
+      <header class="article-header article-header-wide">
+        <nav class="document-id" aria-label="Breadcrumb"><a href="../../research/index.html">Research</a> / Digital Forensics / <a href="index.html" aria-current="page">006</a></nav>
+        <p class="article-label">Editorial research case study · Investigation ongoing</p>
+        <h1 class="article-title">White Buffalo Roam — The Recording That Wasn't There</h1>
+        <p class="case-study-deck">I wanted to reverse-engineer a cheap MP3 player and potentially install Rockbox. Instead, I recovered nearly four hours of audio that its interface couldn't show me.</p>
+        <p class="reading-note">October 2026 · Approximately 8 minutes</p>
+      </header>
+
+      <dl class="research-brief">
+        <div><dt>Target</dt><dd>Generic Actions Semiconductor MP3 player</dd></div>
+        <div><dt>USB ID</dt><dd>10d6:1101</dd></div>
+        <div><dt>Image</dt><dd>4,148,166,656-byte raw storage dump</dd></div>
+        <div><dt>Key find</dt><dd>3h 43m 39s PCM WAV recovered offline</dd></div>
+      </dl>
+
+      <aside class="editorial-aside project-github-gate" aria-label="Technical investigation on GitHub">
+        <p class="section-kicker">Source record</p>
+        <h3>The commands and scripts live on GitHub.</h3>
+        <p>This page tells the story of the investigation. Acquisition offsets, validation scripts, hashes, and terminal records are maintained in the technical repository.</p>
+        <a class="github-cta" href="https://github.com/AyaanB-DotCom/White-Buffalo-Roam">Explore the technical investigation on GitHub <span aria-hidden="true">→</span></a>
+      </aside>
+
+      <nav class="case-study-nav" aria-label="Case study sections">
+        <ol>
+          <li><a href="#premise">Premise</a></li>
+          <li><a href="#beneath">Beneath the interface</a></li>
+          <li><a href="#filesystem">Broken FAT32</a></li>
+          <li><a href="#cabinet">Cabinet archive</a></li>
+          <li><a href="#repetition">Repeated storage</a></li>
+          <li><a href="#recording">The recording</a></li>
+          <li><a href="#listening">Listening</a></li>
+          <li><a href="#remanence">Data remanence</a></li>
+          <li><a href="#lessons">What it taught me</a></li>
+          <li><a href="#technical-documentation">Full investigation</a></li>
+        </ol>
+      </nav>
+
+      <article class="case-study-body">
+        <section class="case-study-section" id="premise">
+          <p class="section-kicker">01 / Introduction</p>
+          <h2>It started with an MP3 player</h2>
+          <p class="section-lede">About a year ago, I bought a cheap, generic MP3 player on eBay. I liked the idea of a dedicated music device, something separate from my phone. There was just one problem: I didn't particularly enjoy using it.</p>
+          <p>The buttons were clunky, the interface felt outdated, and navigating between songs was more frustrating than it needed to be. Eventually I started wondering whether I could do something about it myself. As a cybersecurity student getting deeper into reverse engineering, this looked like a useful opportunity: identify the processor, extract the firmware, analyze it with Ghidra, and determine whether I could modify the interface or get Rockbox running on it.</p>
+          <p>Rockbox is an open-source firmware replacement for certain digital audio players. I had no idea whether this particular device would support it, but figuring that out was part of the appeal. I named the project White Buffalo Roam, after the album I especially wanted to listen to on the player. At the time, I thought this would be a small firmware reverse-engineering experiment. I had no idea what I was about to find.</p>
+        </section>
+
+        <section class="case-study-section" id="beneath">
+          <p class="section-kicker">02 / Acquisition</p>
+          <h2>Taking a look beneath the interface</h2>
+          <p>The first challenge was figuring out what was actually inside the device. It identified itself as an Actions Semiconductor USB device with the identifier <code>10d6:1101</code>. I started researching Actions processors and available firmware tools, but before attempting anything potentially destructive I wanted a backup of the existing storage.</p>
+          <p>I connected it to a separate laptop running Kubuntu Live and created a raw image of the approximately 4&nbsp;GB storage device. This wasn't a normal file transfer. Rather than copying whatever appeared in the music library, I copied the bytes exposed through the device's USB mass-storage interface. That distinction would turn out to be incredibly important.</p>
+          <p>I transferred the resulting image into a Kali Linux virtual machine and began examining its contents. The image was exactly <code>4,148,166,656</code> bytes. I initially expected an ordinary filesystem containing music, configuration files, or useful firmware clues. Instead, the first thing I discovered was that something wasn't right.</p>
+        </section>
+
+        <section class="case-study-section" id="filesystem">
+          <p class="section-kicker">03 / Filesystem failure</p>
+          <h2>The first strange discovery</h2>
+          <p class="section-lede">The device's partition table indicated that a FAT32 filesystem should exist. Under normal circumstances, a computer should be able to recognize and navigate it.</p>
+          <p>When I tried examining the partition, the filesystem tools returned an error: <code>fsck.fat</code> reported that the logical sector size was zero. The sector where the FAT32 boot record should have been located contained nothing but zeros. The conventional backup boot-sector location was also zeroed.</p>
+          <p>From the perspective of a normal filesystem, something was clearly wrong. But that didn't necessarily mean the underlying storage was empty. A filesystem is an organizational structure. Destroying or corrupting that organization doesn't automatically destroy the data underneath it. I couldn't navigate the storage normally, but I could still examine its individual bytes. So that's what I did.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/mbr-fat32-partition.png"><img src="images/mbr-fat32-partition.png" alt="Hex dump of the MBR partition table showing a FAT32 type 0B entry and 55 AA boot signature" width="1024" height="276" decoding="async"></a>
+            <figcaption><span>Fig. 01</span> Partition table entry at offset <code>0x1be</code>: type <code>0b</code> (FAT32) with a valid <code>55 aa</code> boot signature, even though the volume's boot record itself was zeroed.</figcaption>
+          </figure>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/sector-inspection.jpg"><img src="images/sector-inspection.jpg" alt="Terminal hex dumps of selected sectors showing early null sectors and later populated data regions" width="1024" height="888" decoding="async"></a>
+            <figcaption><span>Fig. 02</span> Targeted sector inspection: early partition-adjacent sectors read as null, while deeper offsets still contained dense binary data.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="cabinet">
+          <p class="section-kicker">04 / Embedded software</p>
+          <h2>There was more data than I expected</h2>
+          <p>I began scanning the image with Binwalk. Almost immediately it identified a Microsoft Cabinet archive. I extracted it and found 120 archived entries, including Windows executables, multimedia-related libraries, USB drivers, and components associated with Actions Semiconductor devices.</p>
+          <p>This wasn't what I had originally expected while researching an MP3 player's firmware. There were references to firmware-update mechanisms and device drivers, but nothing that established malicious activity. Still, it gave me another reason to keep investigating.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/cab-mscf-signature.png"><img src="images/cab-mscf-signature.png" alt="xxd hex dump showing MSCF magic bytes at the start of a Microsoft Cabinet archive" width="1024" height="284" decoding="async"></a>
+            <figcaption><span>Fig. 03</span> Cabinet signature <code>MSCF</code> confirmed at the carved archive offset before extraction.</figcaption>
+          </figure>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/cabextract-listing.jpg"><img src="images/cabextract-listing.jpg" alt="cabextract listing the contents of the carved Microsoft Cabinet archive" width="944" height="1024" decoding="async"></a>
+            <figcaption><span>Fig. 04</span> Listing the carved cabinet: 120 archived entries spanning drivers, executables, and related components.</figcaption>
+          </figure>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/actions-vid-inf.jpg"><img src="images/actions-vid-inf.jpg" alt="Driver INF excerpt listing USB VID 10D6 product IDs including PID 1101" width="1024" height="1024" decoding="async"></a>
+            <figcaption><span>Fig. 05</span> Extracted driver information referencing Actions Semiconductor USB IDs, including <code>VID_10D6&amp;PID_1101</code>.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="repetition">
+          <p class="section-kicker">05 / Storage structure</p>
+          <h2>The storage that kept repeating</h2>
+          <p>While examining different regions of the image, I noticed that large sections exhibited extremely high entropy. High-entropy data can indicate compression, encryption, or other complex binary content. Initially I considered those explanations—but something didn't add up. Different sections appeared to share almost identical statistical characteristics.</p>
+          <p>I stopped looking only at entropy and started comparing the actual bytes. The result surprised me: more than 78% of the storage image consisted of repeated copies of the same 1&nbsp;MiB block. One continuous region alone contained 3,102 consecutive, byte-identical blocks. I verified the repetition through direct comparisons rather than matching entropy values alone.</p>
+          <p>I still can't explain why such a large portion of the storage contains repeated data. It could relate to manufacturing, testing, the storage controller, or some other process I haven't yet identified. What it did demonstrate was how misleading a single measurement can be. Data that looks random isn't necessarily unique. And an apparently empty device isn't necessarily empty.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/entropy-analysis.png"><img src="images/entropy-analysis.png" alt="Entropy analysis table showing entropy rising with file size across the Actions MP3 player storage image" width="1024" height="551" decoding="async"></a>
+            <figcaption><span>Fig. 06</span> Entropy and compression-ratio sampling across the image—high values later in the disk that initially looked like encryption.</figcaption>
+          </figure>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/repeated-block-comparison.png"><img src="images/repeated-block-comparison.png" alt="Script output showing identical SHA256 hashes across high-entropy regions and 1 MiB periodicity" width="1024" height="800" decoding="async"></a>
+            <figcaption><span>Fig. 07</span> Direct comparison: high-entropy samples shared the same hash, and a 1&nbsp;MiB shift returned identical data while smaller shifts did not.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="recording">
+          <p class="section-kicker">06 / Unexpected artifact</p>
+          <h2>Then I found something I wasn't looking for</h2>
+          <p class="section-lede">While reviewing Binwalk's results, one entry caught my attention: RIFF audio data (WAV), PCM, 2 channels, 16000 sample rate.</p>
+          <p>At first glance it was simply another file signature. But its location was interesting—the signature appeared at exactly 32&nbsp;MiB into the raw storage image. The bytes formed a valid WAV file header. The declared audio parameters were internally consistent, and the file appeared to extend across a substantial portion of the storage.</p>
+          <p>Then I calculated its duration: 3 hours, 43 minutes, and 39 seconds. Nearly four hours of audio on an MP3 player whose interface hadn't shown me any recordings. I carved the file directly from the raw image and opened it in an audio player. It worked. What started as an investigation into modifying an outdated music player's interface had suddenly become a completely different kind of research project.</p>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/binwalk-cab-wav.jpg"><img src="images/binwalk-cab-wav.jpg" alt="Binwalk output listing Microsoft Cabinet archive and RIFF WAV audio signatures inside the storage image" width="1024" height="952" decoding="async"></a>
+            <figcaption><span>Fig. 08</span> Binwalk identifying the cabinet archive and RIFF WAV signature inside <code>actions_storage.img</code>.</figcaption>
+          </figure>
+
+          <figure class="research-figure research-figure-wide">
+            <a href="images/ffprobe-recording.jpg"><img src="images/ffprobe-recording.jpg" alt="ffprobe metadata for the carved WAV showing 16000 Hz stereo PCM and 13419 second duration" width="922" height="1024" decoding="async"></a>
+            <figcaption><span>Fig. 09</span> Carved recording metadata: 16&nbsp;kHz stereo PCM, duration approximately 3 hours 43 minutes. The original audio is withheld.</figcaption>
+          </figure>
+
+          <figure class="research-figure">
+            <a href="images/wav-fact-chunk.png"><img src="images/wav-fact-chunk.png" alt="Hex dump of a WAV fact chunk filled entirely with zero bytes" width="1024" height="395" decoding="async"></a>
+            <figcaption><span>Fig. 10</span> Structural detail from the recovered WAV: a large zero-filled chunk consistent with a sector-aligned header layout.</figcaption>
+          </figure>
+        </section>
+
+        <section class="case-study-section" id="listening">
+          <p class="section-kicker">07 / Content and privacy</p>
+          <h2>Listening to the recording</h2>
+          <p>I didn't know what to expect when I pressed play. The recording wasn't particularly clear. There was a persistent background hum, occasional static-like noise, and sounds resembling objects being moved or placed on surfaces. At times I heard sharp clunks and rustling. Then, around the ten-minute mark, I heard what sounded like a distant human voice.</p>
+          <p>The voice was quiet, partially obscured by background noise, and difficult to understand. Elsewhere in the recording I encountered additional speech-like sounds. Some of it sounded to me like it might be in an East or Southeast Asian language, but I haven't been able to identify the language reliably. I don't know what is being said, where the recording was made, or who—or what—originally recorded it. Those questions are now the part of this investigation I'm most interested in answering.</p>
+          <p>I've started exploring local speech-recognition tools, including Whisper, to locate sections that might contain intelligible dialogue. Automatic transcription is far from perfect with quiet voices and constant background noise, and these systems can invent words even when the audio is unintelligible. I don't want to mistake an AI-generated transcript for something somebody actually said. My next step is to work with someone fluent in the language, once it can be identified.</p>
+          <p>For now, the content of the recording remains an unanswered question. And because the audio may contain private conversations, I've decided not to publish the recording itself.</p>
+
+          <aside class="editorial-aside" aria-label="Publication boundary">
+            <p class="section-kicker">Publication boundary</p>
+            <h3>Recovered PCM audio is withheld.</h3>
+            <p>The original recording is withheld because its provenance and the identities of potential speakers remain unknown. This page documents that the file exists, plays, and was carved from raw storage—not the private content inside it.</p>
+          </aside>
+        </section>
+
+        <section class="case-study-section" id="remanence">
+          <p class="section-kicker">08 / Interpretation</p>
+          <h2>Why was it there?</h2>
+          <p>This is the question I keep coming back to. The MP3 player has a built-in voice recorder, so it's possible the audio originated from the device itself. But possible isn't the same as proven. The recording could have been created with the player's microphone, copied during manufacturing, included as test material, or left behind by some earlier process. I haven't established which explanation is correct.</p>
+          <p>The WAV has structural properties that might eventually help. Its audio data begins exactly 512 bytes after the start of the file, following a sector-aligned header containing a large zero-filled chunk. That could be consistent with software designed to write audio efficiently to block storage. If I eventually create a controlled recording using the player's built-in microphone, I can compare the resulting WAV structure against the recovered file. A close match could help narrow down its origin—but even then, it wouldn't tell me who recorded it or when.</p>
+          <p>Was the recording deliberately hidden? The recording was hidden from the normal user experience, but I haven't established that anyone intentionally concealed it. Damaged or missing filesystem metadata could explain why the player didn't display it. That is a central idea in digital forensics: data can remain recoverable even when directory entries or other identifying information are gone.</p>
+          <p>Imagine deleting files from a device, resetting it, or preparing it for someone else. You might reasonably assume that once the interface stops displaying your information, the information is gone. Depending on what happened during deletion, formatting, or resetting, some data may remain accessible through lower-level analysis. This phenomenon is known as data remanence.</p>
+          <p>I'm not claiming that my MP3 player demonstrates an improper factory reset or that somebody previously owned it. I simply don't have the evidence to establish that. The device was advertised as new when I purchased it, but I'd owned it for approximately a year before beginning this investigation, and I haven't established when the recovered recording was made.</p>
+          <p>What I can demonstrate is narrower and clearer: I recovered a complete, playable recording from the raw USB-accessible storage despite being unable to locate it through the player's normal interface. Everything beyond that requires more investigation.</p>
+        </section>
+
+        <section class="case-study-section" id="lessons">
+          <p class="section-kicker">09 / Reflections</p>
+          <h2>What this investigation taught me</h2>
+          <p>When I started, my goal was to understand an unfamiliar processor and experiment with custom firmware. I ended up learning something broader about digital forensics: a filesystem isn't the same thing as the underlying data; file signatures need validation before they can be trusted; high entropy doesn't automatically mean encryption; and ordinary consumer electronics can contain storage structures that aren't obvious from their interfaces.</p>
+          <p>Most importantly, I learned the value of following evidence rather than forcing an investigation toward its original objective. I wanted to reverse-engineer firmware. Instead I found a recording—and rather than ignoring it because it wasn't part of the plan, I followed the unexpected evidence.</p>
+          <p>It's easy to turn an unexplained recording into a dramatic story about malware or secret surveillance. The actual evidence doesn't support those conclusions. At least, not right now. The recording exists. It's playable. It contains sounds consistent with environmental activity and possibly human speech. Its origin remains unknown. Acknowledging that uncertainty is part of doing responsible security research.</p>
+          <p>There are still several questions I want to answer: what the voices are saying, whether the recording originated from the player's own microphone, what happened to the damaged filesystem, and why such a large portion of the storage contains repeated data. I also haven't forgotten the original goal—identifying the exact Actions processor, exploring its firmware, and seeing whether a Rockbox port is feasible. For now, the recording has taken priority.</p>
+          <p>I started this project because I wanted a better MP3 player. Now I have nearly four hours of unexplained audio, an unusual storage image, and considerably more questions than when I began. I still don't know what the voices are saying. I still don't know why the recording was there. But I know it was there—even when the interface told me otherwise.</p>
+          <p><em>Investigation ongoing.</em></p>
+        </section>
+
+        <section class="case-study-section full-documentation" id="technical-documentation">
+          <p class="section-kicker">10 / Source record</p>
+          <h2>Full digital forensics investigation</h2>
+          <p>This article focuses on the story behind the investigation. The complete technical research—including acquisition commands, storage offsets, Python scripts, binary analysis, SHA-256 results, terminal outputs, and the WAV recovery process—is available on GitHub.</p>
+          <a class="github-cta" href="https://github.com/AyaanB-DotCom/White-Buffalo-Roam">White Buffalo Roam — Full Digital Forensics Investigation <span aria-hidden="true">→</span></a>
+        </section>
+      </article>
+
+      <a class="back-link" href="../../research/index.html">← Return to Research archive</a>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p></div></footer>
+  <script src="../../script.js"></script>
+</body>
+</html>
