@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="An incident-response plan for a suspected ransomware workstation: preserving volatile data before reinstall, examining processes and network activity, and separating correlation from causation.">
+    <meta name="author" content="AyaanB-DotCom">
+    <title>The Ransomware Workstation / AyaanB-DotCom</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body><a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="header-inner"><a class="site-identity" href="../../../index.html"><span
+                    class="identity-name">AYAANB-DOTCOM</span></a>
+            <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item"
+                    href="../../../index.html">Index</a><a class="nav-item"
+                    href="../../../research/index.html">Research</a><a class="nav-item"
+                    href="../../../writing/index.html">Writing</a><a class="nav-item"
+                    href="../../../resume/index.html">Resume</a><a class="nav-item"
+                    href="../../../about/index.html">About</a><a class="nav-item"
+                    href="../../../contact/index.html">Contact</a></nav>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        <aside class="sidebar" aria-label="Archive navigation">
+            <div class="sidebar-window">
+                <nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link"
+                        href="../../../index.html">Index</a><a class="sidebar-link"
+                        href="../../../research/index.html">Research</a><a class="sidebar-link is-section"
+                        href="../../index.html">Notes</a><a class="sidebar-link"
+                        href="../../../experiments/index.html">Experiments</a><a class="sidebar-link"
+                        href="../../../writing/index.html">Writing</a><a class="sidebar-link"
+                        href="../../../resume/index.html">Resume</a><a class="sidebar-link"
+                        href="../../../about/index.html">About</a></nav>
+                <section class="sidebar-section" aria-labelledby="forensics-navigation">
+                    <h2 class="sidebar-heading" id="forensics-navigation">Digital Forensics</h2>
+                    <ul class="topic-list">
+                        <li><a href="../index.html">Index</a></li>
+                        <li><a href="../case-study-1/index.html">Case Study 1</a></li>
+                        <li><a href="../case-study-2/index.html">Case Study 2</a></li>
+                        <li><a href="../case-study-3/index.html">Case Study 3</a></li>
+                        <li><a href="../case-study-4/index.html">Case Study 4</a></li>
+                        <li><a href="../case-study-5/index.html">Case Study 5</a></li>
+                        <li><a href="index.html" aria-current="page">Case Study 6</a></li>
+                    </ul>
+                </section>
+            </div>
+        </aside>
+
+        <main class="main-content memo-page" id="main">
+            <header class="article-header article-header-wide">
+                <nav class="document-id" aria-label="Breadcrumb"><a href="../../index.html">Notes</a> / <a
+                        href="../index.html">Digital Forensics</a> / <span aria-current="page">006</span></nav>
+                <p class="article-label">Group case study / incident response</p>
+                <h1 class="article-title">The Ransomware Workstation</h1>
+                <p class="article-deck">Why immediate reinstall destroys the investigation—and how volatile data,
+                    logs, and careful correlation can reconstruct how ransomware entered, when encryption began, and
+                    what remains unproven.</p>
+            </header>
+
+            <dl class="memo-routing" aria-label="Memorandum details">
+                <div><dt>To</dt><dd>IT / Incident Response</dd></div>
+                <div><dt>From</dt><dd>&lt;REDACTED&gt;</dd></div>
+                <div><dt>Date</dt><dd><time datetime="2026-10-19">October 19, 2026</time></dd></div>
+                <div><dt>Subject</dt><dd>Incident Response Plan &amp; Analysis — Case Study 6 (The Ransomware
+                        Workstation)</dd></div>
+            </dl>
+
+            <aside class="draft-notice memo-privacy-note" aria-label="Authorship and privacy note">
+                <strong>Publication note.</strong> This memorandum was completed as a group assignment. Contributor
+                names are not mentioned for privacy, and the original author redaction is preserved.
+            </aside>
+
+            <nav class="memo-toc" aria-label="Case study sections">
+                <p>In this memorandum</p>
+                <ol>
+                    <li><a href="#executive-summary">Executive summary</a></li>
+                    <li><a href="#collection-plan">Collection plan</a></li>
+                    <li><a href="#volatile-artifacts">Volatile artifacts</a></li>
+                    <li><a href="#logs">How logs show entry</a></li>
+                    <li><a href="#timeline">Event timeline</a></li>
+                    <li><a href="#investigation-challenge">Correlation vs. causation</a></li>
+                    <li><a href="#conclusion">Conclusion</a></li>
+                </ol>
+            </nav>
+
+            <dl class="case-findings-summary" aria-label="Case findings at a glance">
+                <div>
+                    <dt>Immediate risk</dt>
+                    <dd>Power-off / reimage destroys RAM</dd>
+                </div>
+                <div>
+                    <dt>Collection order</dt>
+                    <dd>RFC 3227 volatility</dd>
+                </div>
+                <div>
+                    <dt>Primary goal</dt>
+                    <dd>Entry path + encryption timing</dd>
+                </div>
+                <div>
+                    <dt>Not established</dt>
+                    <dd>C2 IP as proven cause</dd>
+                </div>
+            </dl>
+
+            <article class="memo-document">
+                <section class="memo-section" id="executive-summary">
+                    <p class="section-number">01</p>
+                    <div>
+                        <h2>Executive Summary</h2>
+                        <p>This document explains the suspected ransomware infection identified on the live
+                            workstation. Currently, the IT department’s plan is to immediately disconnect the
+                            workstation and reinstall Windows. However, this is highly destructive. This plan outlines
+                            how investigators should preserve volatile data, examine the suspected ransomware, and
+                            develop a timeline of the attack. The goal is to determine how ransomware entered the
+                            system, when encryption began, and whether the workstation communicated with other
+                            potentially compromised systems.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="collection-plan">
+                    <p class="section-number">02</p>
+                    <div>
+                        <h2>Forensic Collection Plan (Order of Volatility)</h2>
+                        <p>Before collecting any volatile data, it must be ensured that the device is not powered off.
+                            If the device is powered off, the system can instantly destroy volatile data such as RAM,
+                            running processes, or any active network connections. Shutting down can cause encryption
+                            keys in memory to vanish, making it hard to reconstruct the timeline. The following should
+                            be collected in order from most volatile to least volatile:</p>
+                        <ol class="decision-path">
+                            <li><strong>CPU registers</strong><span>Highest volatility; lost immediately on power
+                                    loss.</span></li>
+                            <li><strong>Network connections</strong><span>Active sessions that may reveal remote
+                                    endpoints.</span></li>
+                            <li><strong>Running processes</strong><span>Record soon after network state; malware may
+                                    stop or delete itself.</span></li>
+                            <li><strong>RAM</strong><span>May hold keys, fileless malware, and attacker
+                                    commands.</span></li>
+                            <li><strong>Temporary file systems</strong><span>Short-lived artifacts that can disappear
+                                    during reboot or cleanup.</span></li>
+                            <li><strong>Disk image</strong><span>Least volatile; collect after logs and memory when
+                                    possible so attackers cannot first erase evidence.</span></li>
+                        </ol>
+                        <p>These logs should be collected prior to the disk image since attackers can potentially
+                            delete them. <span class="citation">(ScienceDirect, 2013)</span> Capturing network
+                            connections and memory first matters because malware may attempt to self-destruct or embed
+                            itself deeper into the OS. This sequence is noted in RFC 3227 as the normal standard.
+                            <span class="citation">(Clocked Out, 2026; Jha, 2026)</span></p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="volatile-artifacts">
+                    <p class="section-number">03</p>
+                    <div>
+                        <h2>Technical Analysis of Volatile Artifacts</h2>
+                        <p>Connections are among the most volatile information. They can reveal IP addresses of
+                            command-and-control (C2) servers—the infrastructure ransomware may communicate with—and
+                            can support further investigation into where the attack activity is directed.</p>
+                        <p>Running processes show which program is doing file encryption, its location, and how it
+                            started. For example, if Microsoft Word launches PowerShell and PowerShell then starts a
+                            suspicious executable, that could indicate that a malicious document or script initiated
+                            the activity. However, this behavior alone does not prove that a phishing email was the
+                            initial attack vector. Additional evidence is needed to confirm how the process started.
+                        </p>
+                        <p>Memory analysis is crucial during an active attack because RAM may contain information about
+                            the ransomware: running programs, hidden malware, passwords, network connections, and
+                            commands the attacker typed. If the malware is fileless, it may exist only in memory in
+                            order to avoid IPS/IDS and antivirus. The RAM might also contain encryption or decryption
+                            keys. <span class="citation">(Nelson, Phillips, &amp; Steuart, 2019)</span></p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="logs">
+                    <p class="section-number">04</p>
+                    <div>
+                        <h2>How Logs Show How the Attacker Got In</h2>
+                        <p>Windows event logs can show failed and successful logins, including remote access via RDP.
+                            They show what programs were started and whether logs were cleared. Email and firewall logs
+                            can be traced if a malicious attachment or download started the attack. EDR alerts show
+                            exactly when security software flagged a potential issue. Ultimately, logs provide a time
+                            frame for when each event occurred, helping identify when an attack may have begun.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="timeline">
+                    <p class="section-number">05</p>
+                    <div>
+                        <h2>Ransomware Event Timeline</h2>
+                        <p>The following timeline represents the suspected sequence of events. Exact times must be
+                            established through examination of the evidence rather than assumed.</p>
+
+                        <table class="investigative-timeline is-wide">
+                            <caption>Suspected ransomware sequence and evidence to examine</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Order</th>
+                                    <th scope="col">Event</th>
+                                    <th scope="col">Evidence to examine</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="timeline-order">1</th>
+                                    <td class="timeline-event">Initial access</td>
+                                    <td class="timeline-evidence">Firewall, event logs, email records, browser
+                                        history, and remote access records</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">2</th>
+                                    <td class="timeline-event">Ransomware executed</td>
+                                    <td class="timeline-evidence">Suspicious processes running as seen in Task Manager
+                                        and process listings</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">3</th>
+                                    <td class="timeline-event">C2 server communication</td>
+                                    <td class="timeline-evidence">Active network connections seen by <code>netstat</code>
+                                        and captured volatility data</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">4</th>
+                                    <td class="timeline-event">Files encrypted</td>
+                                    <td class="timeline-evidence">Changed file extensions and files that cannot be
+                                        opened</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="timeline-order">5</th>
+                                    <td class="timeline-event">Ransom note displayed</td>
+                                    <td class="timeline-evidence">Ransom-note file metadata, screen documentation, and
+                                        user observation</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="memo-section" id="investigation-challenge">
+                    <p class="section-number">06</p>
+                    <div>
+                        <h2>Investigation Challenge: Correlation vs. Causation</h2>
+                        <p>In this investigation, correlation and causation are not the same thing. Correlation means
+                            that two things are connected to each other. For example, file encryption and a C2-looking
+                            connection may be correlated. Causation is when one action leads to the result of the
+                            other—for example, claiming that an IP address found in active connections is the C2
+                            connection and caused the ransom.</p>
+                        <p>Just finding an active connection and IP is not proof that this was the cause of the
+                            encrypted files. The IP could be associated with a legitimate service such as a Windows
+                            update. Further evidence may need to be correlated, such as third-party intelligence that
+                            relates the IP to the ransomware family (for example, public reporting from vendors such as
+                            Kaspersky).</p>
+                        <p>A suspicious connection does not prove that the IP caused the attack. To support that claim,
+                            investigators would need to show that the program making connections is the same program
+                            encrypting the files, with matching timestamps, and that the IP is flagged as malicious.
+                            Until that evidence is available, the external connection should be described as
+                            <em>suspicious</em> rather than confirmed as the cause of the attack.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-conclusion" id="conclusion">
+                    <p class="section-number">07</p>
+                    <div>
+                        <h2>Conclusion</h2>
+                        <p>The workstation should not be shut down or reinstalled until the necessary forensic evidence
+                            has been collected and preserved. Investigators should prioritize volatile information,
+                            capture memory, preserve relevant logs, and create a forensic disk image. Hashes and
+                            chain-of-custody records should be maintained to support the integrity of the evidence. By
+                            comparing process information, network activity, logs, and file-system artifacts,
+                            investigators can develop a more reliable timeline and determine how the ransomware
+                            operated. The final findings should distinguish confirmed evidence from assumptions so that
+                            the investigation does not claim more than the available evidence supports.</p>
+                    </div>
+                </section>
+
+                <section class="memo-section memo-references" id="references">
+                    <p class="section-number">08</p>
+                    <div>
+                        <h2>References</h2>
+                        <ol>
+                            <li>Clocked Out. (2026). <a
+                                    href="https://clocked-out.com/what-is-order-of-volatility/"><cite>What is order of
+                                        volatility?</cite></a>.</li>
+                            <li>Jha, S. (2026, September 21). <a
+                                    href="https://forensicspot.com/topics/incident-response-and-management/volatile-data-and-the-order-of-volatility"><cite>Volatile
+                                        data and the order of volatility</cite></a>. Forensic Spot.</li>
+                            <li>Nelson, B., Phillips, A., &amp; Steuart, C. (2019). <cite>Guide to computer forensics
+                                    and investigations</cite> (6th ed.). Cengage Learning.</li>
+                            <li>ScienceDirect. (2013). <a
+                                    href="https://www.sciencedirect.com/topics/computer-science/malicious-process"><cite>Malicious
+                                        process</cite></a>. ScienceDirect Topics.</li>
+                        </ol>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-link" href="../index.html">← Return to Digital Forensics notes</a>
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© <span data-current-year>2026</span> AYAANB-DOTCOM</p>
+        </div>
+    </footer>
+    <script src="../../../script.js"></script>
+</body>
+
+</html>
