@@ -54,7 +54,7 @@ ul, ol { padding: 0; }
 
 .header-inner {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1.25rem 3rem;
   width: min(100%, 1280px);
@@ -64,8 +64,19 @@ ul, ol { padding: 0; }
 }
 
 .site-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   color: var(--ink);
   text-decoration: none;
+}
+
+.identity-logo {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .identity-name {
