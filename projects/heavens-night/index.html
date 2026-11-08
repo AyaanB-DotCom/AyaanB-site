@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An ongoing digital forensics investigation into a suspected malware infection that shifted from a Minecraft .jar suspicion toward a Ren'Py application package and unresolved file relationships.">
+  <meta name="author" content="Ghidra's Lair">
+  <title>Heaven's Night / Ghidra's Lair</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header-inner">
+    <a class="site-identity" href="../../index.html"><img class="identity-logo" src="../../assets/ghidra-logo.png" alt="" width="32" height="32"><span class="identity-name">GHIDRA'S LAIR</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-item" href="../../index.html">Index</a><a class="nav-item is-section" href="../../research/index.html">Research</a><a class="nav-item" href="../../writing/index.html">Writing</a><a class="nav-item" href="../../resume/index.html">Resume</a><a class="nav-item" href="../../about/index.html">About</a><a class="nav-item" href="../../contact/index.html">Contact</a></nav>
+  </div></header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Archive navigation"><div class="sidebar-window"><nav class="sidebar-nav" aria-label="Archive sections"><a class="sidebar-link" href="../../index.html">Index</a><a class="sidebar-link is-section" href="../../research/index.html">Research</a><a class="sidebar-link" href="../../notes/index.html">Notes</a><a class="sidebar-link" href="../../experiments/index.html">Experiments</a><a class="sidebar-link" href="../../writing/index.html">Writing</a><a class="sidebar-link" href="../../resume/index.html">Resume</a><a class="sidebar-link" href="../../about/index.html">About</a></nav></div></aside>
+
+    <main class="main-content research-article" id="main">
+      <header class="article-header article-header-wide">
+        <nav class="document-id" aria-label="Breadcrumb"><a href="../../research/index.html">Research</a> / Digital Forensics / <a href="index.html" aria-current="page">007</a></nav>
+        <p class="article-label">Editorial research case study · Ongoing</p>
+        <h1 class="article-title">Heaven's Night</h1>
+        <p class="case-study-deck">Investigating a suspected malware infection: from Minecraft to Ren'Py. A Malwarebytes report, a reused launcher hash, and a packaged visual-novel archive that still leaves the infection chain incomplete.</p>
+        <p class="reading-note">Case study · November 2026 · Ongoing investigation</p>
+      </header>
+
+      <dl class="research-brief">
+        <div><dt>Focus</dt><dd>Digital forensics, malware analysis, threat intelligence</dd></div>
+        <div><dt>Trigger</dt><dd>Malwarebytes report, Windows 11 host, Nov 4, 2026</dd></div>
+        <div><dt>Pivot</dt><dd>Ren'Py launcher (<code>Setup.exe</code>) and packaged archive</dd></div>
+        <div><dt>Status</dt><dd>Ongoing — no malware family conclusively established</dd></div>
+      </dl>
+
+      <aside class="editorial-aside" aria-label="Investigation status">
+        <p class="section-kicker">Investigation status</p>
+        <h3>This case remains open. Confirmed observations and unfinished leads are kept separate on purpose.</h3>
+        <p>The findings documented here reflect evidence collected and analyzed so far. Certain behaviors and relationships remain unverified, and conclusions may change as additional artifacts are examined. No malware family, confirmed infostealer activity, or complete infection chain has been conclusively established.</p>
+      </aside>
+
+      <nav class="case-study-nav" aria-label="Case study sections">
+        <ol>
+          <li><a href="#how-it-started">How it started</a></li>
+          <li><a href="#renpy">Ren'Py discovery</a></li>
+          <li><a href="#virustotal">VirusTotal evidence</a></li>
+          <li><a href="#archive">Software archive</a></li>
+          <li><a href="#inside">Inside the application</a></li>
+          <li><a href="#log">Execution log</a></li>
+          <li><a href="#other-detections">Other detections</a></li>
+          <li><a href="#established">What is established</a></li>
+          <li><a href="#next">Next steps</a></li>
+          <li><a href="#technical-documentation">Full documentation</a></li>
+        </ol>
+      </nav>
+
+      <article class="case-study-body">
+        <section class="case-study-section" id="how-it-started">
+          <p class="section-kicker">01 / Introduction</p>
+          <h2>How it started</h2>
+          <p class="section-lede">The case began when I was contacted by a friend regarding an individual whose computer had reportedly been infected with malware. I was provided with a Malwarebytes scan report and several potentially suspicious files for investigation.</p>
+          <p>The affected computer was running Windows 11, and a Malwarebytes scan performed on November 4, 2026, identified four suspicious files. All four were reported as quarantined.</p>
+          <p>The initial suspicion was that the infection originated from a malicious Minecraft <code>.jar</code> mod. That seemed plausible at first, especially because two of the detections involved a Minecraft launcher and its shortcut. There was insufficient evidence to establish that connection.</p>
+          <p>During further investigation, preliminary open-source intelligence and antivirus analysis shifted attention toward another suspicious file: <code>Setup.exe</code>. The executable sat inside a directory named <code>RT809H_Software_Free_Download_Archive_win_7552</code>.</p>
+          <p>What initially appeared to be a straightforward investigation into a potentially malicious Minecraft mod had turned into something more complicated.</p>
+        </section>
+
+        <section class="case-study-section" id="renpy">
+          <p class="section-kicker">02 / Unexpected discovery</p>
+          <h2>An unexpected discovery: Ren'Py</h2>
+          <p>I began researching <code>Setup.exe</code> using VirusTotal, a platform that aggregates antivirus detection results, file metadata, and behavioral analysis.</p>
+          <p>One of the first interesting discoveries was that the executable appeared consistent with a legitimate launcher for the <strong>Ren'Py Visual Novel Engine</strong>. Ren'Py is a framework commonly used to develop visual novels and other interactive applications, particularly story-based games involving dialogue, images, and player choices.</p>
+          <p>At the time of investigation, the executable had a VirusTotal detection ratio of just <strong>1 out of 71</strong> antivirus vendors, with Malwarebytes being the only vendor flagging the file. That raised a useful question: how could an executable associated with so many suspicious files have such a low detection ratio?</p>
+          <p>A legitimate application launcher does not necessarily contain the code responsible for everything an application does. Its primary purpose may simply be to initialize the framework and load the additional libraries, scripts, and resources needed for the application to function. An executable itself may not contain malicious code, even if it is distributed alongside malicious files.</p>
+          <p><strong>Could a legitimate application launcher be used to execute malicious code stored elsewhere in a software package?</strong> That question became the focus of the investigation.</p>
+        </section>
+
+        <section class="case-study-section" id="virustotal">
+          <p class="section-kicker">03 / File relationships</p>
+          <h2>Following the VirusTotal evidence</h2>
+          <p class="section-lede">As examination continued, the same executable appeared under numerous different filenames.</p>
+          <p>Some were variations of <code>Setup.exe</code>, while others were associated with various games and software packages. Because the SHA-256 hash was identical, those different filenames all referred to the same executable content. The launcher appeared to have been reused across many different applications.</p>
+          <p>VirusTotal displayed more than 20,000 relationships categorized as execution parents. While examining those results, numerous related files and compressed software packages showed substantially higher antivirus detection ratios than the executable itself. Some of those packages appeared to be associated with pirated software and repackaged games.</p>
+          <p>One possibility is that malicious software distributors are reusing legitimate Ren'Py executables as part of modified or repackaged applications. In that scenario, the launcher itself might be legitimate, while other files included with the application contain the malicious functionality.</p>
+
+          <aside class="editorial-aside" aria-label="Evidence boundary">
+            <p class="section-kicker">Evidence boundary</p>
+            <h3>Low detection does not prove safety. Association with suspicious files does not prove this executable is malicious.</h3>
+            <p>These relationships provided investigative leads, but they were not enough to establish what actually happened on the affected computer. The surrounding application files had to be examined next.</p>
+          </aside>
+        </section>
+
+        <section class="case-study-section" id="archive">
+          <p class="section-kicker">04 / Static examination</p>
+          <h2>Examining the software archive</h2>
+          <p>Following the initial VirusTotal investigation, a ZIP archive associated with the suspicious software package became available. It was examined using Kali Linux inside an isolated virtual machine, beginning with static analysis rather than executing the application.</p>
+          <p>The archive contained <strong>1,529 entries</strong>, with approximately 784 MB of uncompressed data. Inside were recognizable Ren'Py application directories, Python libraries, compiled resources, graphical assets, and several unusually named files. That strongly suggested a packaged Ren'Py application rather than a standalone Windows installer.</p>
+          <p>One of the most important findings was something that was not there.</p>
+
+          <h3>Where was Setup.exe?</h3>
+          <p>The original Malwarebytes report identified <code>SETUP.EXE</code> inside an extracted directory with the same name as the archive. Yet the ZIP examined did not contain a standalone <code>SETUP.EXE</code>. Instead, it contained <code>setup.py</code>, a Python script belonging to the Ren'Py framework. Those are two different files.</p>
+          <p>Inspection of the beginning of <code>setup.py</code> found standard framework functionality for locating application directories, resources, and save files. No obviously malicious instructions were identified in the portion examined.</p>
+          <p>The absence of <code>SETUP.EXE</code> introduced an important limitation. It is possible that the executable had been quarantined before the archive was obtained, that a different version of the archive was provided, or that the files had been repackaged. None of those explanations has been confirmed. That meant the archive could not be established as an unchanged copy of the original software package. Nevertheless, it contained several files worth investigating.</p>
+        </section>
+
+        <section class="case-study-section" id="inside">
+          <p class="section-kicker">05 / Application structure</p>
+          <h2>Looking inside the application</h2>
+          <p>During the archive examination, several files with unusual extensions and sizes stood out. Some were hundreds of megabytes, while others were only a few hundred bytes. These included a Ren'Py resource archive, unusually named binary data, and a small hidden file containing what appeared to be encoded text.</p>
+          <p>Hexadecimal headers were examined to determine whether they used recognizable file formats. One file, <code>libwin.rpa</code>, began with an <code>RPA-3.0</code> signature, identifying it as a Ren'Py archive. Other files did not contain immediately recognizable signatures in the portions examined.</p>
+          <p>That does not necessarily indicate malicious activity. Applications frequently use custom resource formats, compression, and encoded data for legitimate purposes. These files may still help explain what the application does during initialization. The objective now is to determine what they contain and whether they are referenced by the application's startup code.</p>
+          <p>The investigation is gradually moving beyond antivirus detections and into examining the application's actual structure.</p>
+        </section>
+
+        <section class="case-study-section" id="log">
+          <p class="section-kicker">06 / Runtime artifact</p>
+          <h2>An interesting finding in the execution log</h2>
+          <p>One of the more interesting discoveries was a <code>log.txt</code> file included inside the archive. The log recorded a Ren'Py application initializing in a Windows environment on November 2, 2026. It showed the application loading its scripts, initializing various components, and eventually preparing its graphical interface.</p>
+          <p>During initialization, the log contained an HTTP response showing <strong>status code 503</strong>, followed by a reference to a compiled Ren'Py script named <code>script.rpyc</code>. An HTTP 503 response generally indicates that a server was unavailable or unable to fulfill a request.</p>
+          <p>That raised the possibility that the application attempted to communicate with an external service during startup. Was it checking for an update, requesting application data, or attempting something else? At this stage, those questions remain unanswered. The log did not reveal the destination, request contents, or purpose of the operation. It also has not been conclusively linked to the affected person's computer.</p>
+          <p>What makes the finding useful is that it provides a specific location in the application's initialization process to investigate further. The compiled script referenced in the log was not visible as a standalone file in the outer ZIP archive. It may be stored inside another packaged resource, although that has not yet been confirmed. Recovering and examining this script is now one of the main priorities.</p>
+        </section>
+
+        <section class="case-study-section" id="other-detections">
+          <p class="section-kicker">07 / Related detections</p>
+          <h2>What about the other Malwarebytes detections?</h2>
+          <p>While the investigation has primarily focused on the Ren'Py application, the original Malwarebytes report identified three other files. These included a Minecraft launcher, its taskbar shortcut, and a DLL named <code>ETWPROVIDERS.DLL</code> found inside a temporary Windows directory.</p>
+          <p>The DLL is particularly interesting because temporary directories are sometimes used by malicious software to extract or stage additional components. There are documented malware campaigns that abuse Ren'Py applications to load additional payloads. Some involve multiple execution stages and temporary file extraction.</p>
+          <p>The existence of similar techniques does not establish that this sample belongs to one of those campaigns. At present, it has not been confirmed that the Ren'Py application created, loaded, or otherwise interacted with the DLL identified by Malwarebytes. The Minecraft-related detections may also be unrelated.</p>
+          <p>One goal of this investigation is to determine whether these files form part of the same infection chain or represent separate detections on the affected computer. The evidence should not be forced into a particular explanation without support.</p>
+        </section>
+
+        <section class="case-study-section" id="established">
+          <p class="section-kicker">08 / Current findings</p>
+          <h2>What has actually been established?</h2>
+          <p>At this stage, several observations have been established.</p>
+
+          <ol class="finding-register">
+            <li><div><h3>Four quarantined detections</h3><p>The original Malwarebytes report identified four suspicious files and reported that all four were quarantined.</p></div></li>
+            <li><div><h3>A reused Ren'Py launcher hash</h3><p>One of those files, <code>Setup.exe</code>, has a hash matching a widely encountered Ren'Py launcher with a relatively low VirusTotal detection ratio.</p></div></li>
+            <li><div><h3>A packaged Ren'Py archive</h3><p>The available ZIP contained compiled resources, Python libraries, and several unidentified files consistent with a packaged Ren'Py application.</p></div></li>
+            <li><div><h3>An HTTP 503 during initialization</h3><p>An application log inside the archive documented a previous initialization event involving an HTTP 503 response and a compiled Ren'Py script.</p></div></li>
+          </ol>
+
+          <p>Several important questions remain unanswered. The original <code>SETUP.EXE</code> was not present in the archive examined. The compiled startup script has not yet been recovered, and the unidentified application resources have not been fully analyzed.</p>
+          <p>More importantly, no malicious command-and-control destination, confirmed data theft, or complete infection chain has been established. The available evidence is sufficient to justify further investigation, but not enough to conclude that the supplied archive independently contains or executes an infostealer.</p>
+        </section>
+
+        <section class="case-study-section" id="next">
+          <p class="section-kicker">09 / Next steps</p>
+          <h2>Where the investigation goes next</h2>
+          <p>The next step is to continue examining the internal Ren'Py archive and attempt to recover the compiled startup script referenced in the execution log. From there, the work is to understand what the application actually does during initialization, determine the purpose of the unidentified resources, and investigate whether any of its behavior can be connected to the other Malwarebytes detections.</p>
+          <p>If the available evidence allows it, controlled dynamic analysis is also planned to observe file creation, process activity, and network communication. The ultimate goal is to reconstruct an infection chain supported by verifiable evidence rather than assumptions.</p>
+          <p>Even if some of the suspicious files turn out to be legitimate or unrelated, documenting those findings is an important part of the forensic process.</p>
+
+          <aside class="editorial-aside" aria-label="Working conclusion">
+            <p class="section-kicker">Working conclusion</p>
+            <h3>Heaven's Night remains an active investigation.</h3>
+            <p>What started as a suspected malicious Minecraft mod has developed into a broader investigation involving a Ren'Py application, suspicious file relationships, and unidentified application resources. A file can appear relatively harmless in isolation while being distributed as part of a potentially malicious application. At the same time, an association with suspicious files does not automatically establish malicious behavior. This case continues to reinforce the importance of examining available evidence, questioning initial assumptions, and separating confirmed observations from hypotheses.</p>
+          </aside>
+        </section>
+
+        <section class="case-study-section full-documentation" id="technical-documentation">
+          <p class="section-kicker">10 / Source record</p>
+          <h2>Full technical investigation</h2>
+          <p>This article focuses on the investigative narrative. The complete technical research—including SHA-256 hashes, VirusTotal results, PE structure, archive inspection commands, and ongoing reverse-engineering work—is available on GitHub.</p>
+          <a class="github-cta" href="https://github.com/AyaanB-DotCom/Heavens-Night">Explore the Full Technical Investigation on GitHub <span aria-hidden="true">→</span></a>
+          <p class="documentation-links"><a href="https://github.com/AyaanB-DotCom/Heavens-Night">Heaven's Night repository</a></p>
+          <p>This research is conducted for educational and defensive cybersecurity purposes. Identifying information associated with the affected individual has been redacted, and the investigation does not involve public distribution of live malware samples.</p>
+        </section>
+      </article>
+
+      <a class="back-link" href="../../research/index.html">← Return to Research archive</a>
+    </main>
+  </div>
+
+  <footer class="site-footer"><div class="footer-inner"><p>© <span data-current-year>2026</span> GHIDRA'S LAIR</p></div></footer>
+  <script src="../../script.js"></script>
+</body>
+</html>
